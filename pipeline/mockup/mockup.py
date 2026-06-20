@@ -418,7 +418,43 @@ def _generate_psd_single(print_path: Path, template_path: Path, mockups_dir: Pat
 
 def _generate_psd_multi(collection_dir: Path, template_path: Path, mockups_dir: Path,
                         prints: list[Path] | None = None, suffix: str = "") -> list[Path]:
-    """Generate one mockup for a multi-frame template. `prints` overrides auto-collection."""
+    """Generate one mockup for a multi-frame template. Uses calibrated corners when available."""
+    slug       = _slug(template_path)
+    cal        = _load_calibration().get(slug, {})
+    cal_frames = cal.get("frames", [])
+    flat_png   = TEMPLATES_DIR / "all_mockuptemplates" / f"{slug}.png"
+
+    if cal_frames and all(f and "tl" in f for f in cal_frames) and flat_png.exists():
+        # Fast path: calibrated corners + flat PNG (same as single-frame)
+        entry  = _get_entry(str(template_path.relative_to(TEMPLATES_DIR)))
+        raw_b  = (entry.get("bounds") or [{}])[0] if entry else {}
+        OUTPUT_SIZE = 3000
+        bg_pil = Image.open(flat_png).convert("RGB")
+        orig_w, orig_h = bg_pil.size
+        bg_pil = bg_pil.resize((OUTPUT_SIZE, OUTPUT_SIZE), Image.LANCZOS)
+        bg     = np.array(bg_pil)
+        png_h, png_w = bg.shape[:2]
+
+        pool   = prints if prints is not None else _collect_prints(collection_dir, len(cal_frames))
+        if not pool:
+            return []
+        picks  = random.sample(pool, min(len(cal_frames), len(pool)))
+        result = bg.copy()
+        white_fill = entry.get("flagged", False) if entry else False
+        for i, frame_cal in enumerate(cal_frames):
+            if i < len(picks):
+                corners = _scale_corners(
+                    {**frame_cal, "psd_w": raw_b.get("psd_w", orig_w),
+                                  "psd_h": raw_b.get("psd_h", orig_h)},
+                    png_w, png_h,
+                )
+                _place_print_quad(bg, result, corners, picks[i], white_fill=white_fill)
+        name = f"{slug}{suffix}.png"
+        out  = mockups_dir / name
+        Image.fromarray(result).save(str(out))
+        return [out]
+
+    # Fallback: PSD smart objects (uncalibrated)
     if not template_path.exists():
         return []
     bg, smart_layers = _open_psd_bg(template_path)
@@ -432,7 +468,7 @@ def _generate_psd_multi(collection_dir: Path, template_path: Path, mockups_dir: 
     for i, frame in enumerate(smart_layers):
         if i < len(picks):
             _place_print(bg, result, frame, picks[i])
-    name = f"{_slug(template_path)}{suffix}.png"
+    name = f"{slug}{suffix}.png"
     out  = mockups_dir / name
     Image.fromarray(result).save(str(out))
     return [out]

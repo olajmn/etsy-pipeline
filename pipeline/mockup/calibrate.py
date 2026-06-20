@@ -31,7 +31,8 @@ def _save_calibration(data: dict):
     CALIB_FILE.write_text(json.dumps(data, indent=2, ensure_ascii=False))
 
 
-def _get_bounds(slug: str, psd_path: Path) -> dict | None:
+def _get_bounds(slug: str, psd_path: Path) -> list[dict]:
+    """Return bounds for each smart object in the PSD. Cached by slug."""
     if slug in _bounds_cache:
         return _bounds_cache[slug]
     try:
@@ -39,14 +40,24 @@ def _get_bounds(slug: str, psd_path: Path) -> dict | None:
         psd   = PSDImage.open(str(psd_path))
         smart = [l for l in psd if l.kind == "smartobject"]
         if smart:
-            f = smart[0]
-            b = {"top": f.top, "left": f.left, "bottom": f.bottom, "right": f.right,
-                 "psd_w": psd.width, "psd_h": psd.height}
-            _bounds_cache[slug] = b
-            return b
+            result = [{"top": f.top, "left": f.left, "bottom": f.bottom, "right": f.right,
+                       "psd_w": psd.width, "psd_h": psd.height} for f in smart]
+            _bounds_cache[slug] = result
+            return result
     except Exception as e:
         print(f"  bounds error {psd_path.name}: {e}")
-    return None
+    _bounds_cache[slug] = []
+    return []
+
+
+def _get_png_size(slug: str) -> tuple[int, int]:
+    """Get dimensions of the flat PNG template."""
+    from PIL import Image as PilImage
+    flat_png = TEMPLATES_DIR / "all_mockuptemplates" / f"{slug}.png"
+    if flat_png.exists():
+        with PilImage.open(flat_png) as im:
+            return im.size
+    return (1000, 1000)
 
 
 def _get_templates() -> list[dict]:
@@ -55,21 +66,30 @@ def _get_templates() -> list[dict]:
     for jf in [TEMPLATES_DIR / "all_segments.json"]:
         try:
             for entry in json.loads(jf.read_text()):
-                if entry.get("frames") != 1:
-                    continue
+                n_frames = entry.get("frames", 1)
                 slug     = entry["template"]
                 psd_path = TEMPLATES_DIR / entry["path"]
                 flat_png = TEMPLATES_DIR / "all_mockuptemplates" / f"{slug}.png"
                 png_path = flat_png if flat_png.exists() else psd_path.with_suffix(".png")
                 if png_path.exists():
+                    cal = calib.get(slug, {})
+                    if n_frames == 1:
+                        frames_done   = 1 if "tl" in cal else 0
+                        is_calibrated = frames_done == 1
+                    else:
+                        cal_frames    = cal.get("frames", [])
+                        frames_done   = sum(1 for f in cal_frames if f and "tl" in f)
+                        is_calibrated = frames_done == n_frames
                     templates.append({
-                        "slug":       slug,
-                        "path":       entry["path"],
-                        "set":        entry.get("set", slug),
-                        "calibrated": slug in calib,
-                        "active":     entry.get("active", True),
-                        "flagged":    entry.get("flagged", False),
-                        "skipped":    entry.get("skipped", False),
+                        "slug":        slug,
+                        "path":        entry["path"],
+                        "set":         entry.get("set", slug),
+                        "frames":      n_frames,
+                        "frames_done": frames_done,
+                        "calibrated":  is_calibrated,
+                        "active":      entry.get("active", True),
+                        "flagged":     entry.get("flagged", False),
+                        "skipped":     entry.get("skipped", False),
                     })
         except Exception:
             pass
@@ -103,33 +123,58 @@ def api_image(slug):
 
 @app.route("/api/template/<slug>/bounds")
 def api_bounds(slug):
-    calib = _load_calibration()
+    frame_idx = request.args.get("frame_idx", None, type=int)
+    calib     = _load_calibration()
     for jf in sorted(TEMPLATES_DIR.rglob("*.json")):
         try:
             for entry in json.loads(jf.read_text()):
-                if entry.get("template") == slug:
-                    psd = TEMPLATES_DIR / entry["path"]
-                    b   = _get_bounds(slug, psd)
+                if entry.get("template") != slug:
+                    continue
+                n_frames     = entry.get("frames", 1)
+                bounds_list  = _get_bounds(slug, TEMPLATES_DIR / entry["path"])
+
+                if frame_idx is None or n_frames == 1:
+                    # Single-frame (existing behavior)
+                    b   = bounds_list[0] if bounds_list else None
+                    if not b:
+                        return jsonify({"error": "not found"}), 404
+                    cal = calib.get(slug, {})
+                    if "tl" in cal:
+                        corners = cal
+                    elif cal:
+                        corners = {
+                            "tl": [b["left"]  + cal.get("left", 0),  b["top"]    + cal.get("top", 0)],
+                            "tr": [b["right"] - cal.get("right", 0), b["top"]    + cal.get("top", 0)],
+                            "bl": [b["left"]  + cal.get("left", 0),  b["bottom"] - cal.get("bottom", 0)],
+                            "br": [b["right"] - cal.get("right", 0), b["bottom"] - cal.get("bottom", 0)],
+                        }
+                    else:
+                        corners = {"tl": [b["left"], b["top"]], "tr": [b["right"], b["top"]],
+                                   "bl": [b["left"], b["bottom"]], "br": [b["right"], b["bottom"]]}
+                    return jsonify({**b, "corners": corners})
+                else:
+                    # Multi-frame: return bounds for the specific frame
+                    b = bounds_list[frame_idx] if frame_idx < len(bounds_list) else None
                     if b:
-                        cal = calib.get(slug, {})
-                        if "tl" in cal:
-                            corners = cal
-                        elif cal:
-                            # convert old offset format → corners
-                            corners = {
-                                "tl": [b["left"]  + cal.get("left", 0),  b["top"]    + cal.get("top", 0)],
-                                "tr": [b["right"] - cal.get("right", 0), b["top"]    + cal.get("top", 0)],
-                                "bl": [b["left"]  + cal.get("left", 0),  b["bottom"] - cal.get("bottom", 0)],
-                                "br": [b["right"] - cal.get("right", 0), b["bottom"] - cal.get("bottom", 0)],
-                            }
-                        else:
-                            corners = {
-                                "tl": [b["left"],  b["top"]],
-                                "tr": [b["right"], b["top"]],
-                                "bl": [b["left"],  b["bottom"]],
-                                "br": [b["right"], b["bottom"]],
-                            }
-                        return jsonify({**b, "corners": corners})
+                        psd_w, psd_h = b["psd_w"], b["psd_h"]
+                        base = b
+                    else:
+                        psd_w, psd_h = _get_png_size(slug)
+                        fw   = psd_w // n_frames
+                        x0   = frame_idx * fw
+                        base = {"left": x0, "top": 0, "right": x0 + fw, "bottom": psd_h,
+                                "psd_w": psd_w, "psd_h": psd_h}
+
+                    cal        = calib.get(slug, {})
+                    cal_frames = cal.get("frames", [])
+                    if frame_idx < len(cal_frames) and cal_frames[frame_idx] and "tl" in cal_frames[frame_idx]:
+                        corners = cal_frames[frame_idx]
+                    else:
+                        corners = {"tl": [base["left"],  base["top"]],
+                                   "tr": [base["right"], base["top"]],
+                                   "bl": [base["left"],  base["bottom"]],
+                                   "br": [base["right"], base["bottom"]]}
+                    return jsonify({**base, "corners": corners})
         except Exception:
             pass
     return jsonify({"error": "not found"}), 404
@@ -144,15 +189,35 @@ def api_sample_print():
 
 @app.route("/api/template/<slug>/calibrate", methods=["POST"])
 def api_calibrate(slug):
-    data  = request.json  # {tl:[x,y], tr:[x,y], bl:[x,y], br:[x,y]}
-    calib = _load_calibration()
-    calib[slug] = data
+    data        = request.json
+    frame_idx   = data.pop("frame_idx", None)
+    frame_count = data.pop("frame_count", 1)
+    calib       = _load_calibration()
+
+    if frame_idx is not None:
+        # Multi-frame: save corners for one frame at a time
+        entry = calib.get(slug, {})
+        if "frames" not in entry:
+            entry = {"frames": [None] * frame_count}
+        while len(entry["frames"]) < frame_count:
+            entry["frames"].append(None)
+        entry["frames"][frame_idx] = data
+        calib[slug]  = entry
+        fully_done   = all(f and "tl" in f for f in entry["frames"])
+    else:
+        # Single-frame
+        calib[slug] = data
+        fully_done  = True
+
     _save_calibration(calib)
-    src = TEMPLATES_DIR / "all_mockuptemplates" / f"{slug}.png"
-    dst = TEMPLATES_DIR / "mockuptemplates_calibrated" / f"{slug}.png"
-    if src.exists():
-        shutil.copy2(src, dst)
-    return jsonify({"ok": True})
+
+    if fully_done:
+        src = TEMPLATES_DIR / "all_mockuptemplates" / f"{slug}.png"
+        dst = TEMPLATES_DIR / "mockuptemplates_calibrated" / f"{slug}.png"
+        if src.exists():
+            shutil.copy2(src, dst)
+
+    return jsonify({"ok": True, "fully_done": fully_done})
 
 
 @app.route("/api/template/<slug>/skip", methods=["POST"])
@@ -226,9 +291,12 @@ def api_generate(slug):
         out_dir = Path("pipeline/mockup/previews")
         out_dir.mkdir(exist_ok=True)
 
-        calib = json.loads((Path("pipeline/mockup/calibration.json")).read_text())
-        if slug not in calib:
+        calib     = json.loads((Path("pipeline/mockup/calibration.json")).read_text())
+        cal_entry = calib.get(slug, {})
+        if not cal_entry:
             return jsonify({"error": "Ikke kalibrert — kalibrere hjørnene først"}), 400
+        if "frames" in cal_entry:
+            return jsonify({"error": "Forhåndsvisning for multi-frame ikke støttet ennå"}), 400
 
         results = mockup._generate_psd_single(print_path, psd_path, out_dir)
         if not results:
@@ -312,6 +380,7 @@ button { padding:7px 16px; border:none; border-radius:6px;
 
 #info    { font-size:12px; color:#666; }
 #offsets { font-size:10px; color:#444; font-family:monospace; }
+#frame-indicator { font-size:13px; color:#fa0; font-weight:600; min-height:20px; }
 </style>
 </head>
 <body>
@@ -347,6 +416,7 @@ button { padding:7px 16px; border:none; border-radius:6px;
     <button id="btn-flag">⚑ Flagg</button>
     <button id="btn-deactivate">Deaktiver</button>
   </div>
+  <div id="frame-indicator"></div>
   <div id="info">Laster...</div>
   <div id="offsets"></div>
 </div>
@@ -358,6 +428,8 @@ let savedCorners = null;
 let activeDrag = null;
 let placing = false;
 let corner1 = null;
+let currentFrame = 0;
+let currentNFrames = 1;
 
 const img       = document.getElementById("template-img");
 const refOvl    = document.getElementById("ref-overlay");
@@ -387,6 +459,37 @@ function psdToWrap(x, y) {
            y: y*(img.clientHeight/bounds.psd_h) };
 }
 
+function updateFrameIndicator() {
+  document.getElementById("frame-indicator").textContent =
+    currentNFrames > 1 ? `Ramme ${currentFrame+1} av ${currentNFrames}` : "";
+}
+
+async function loadFrame(f) {
+  currentFrame = f;
+  clearCanvas();
+  Object.values(handles).forEach(h => h.style.display="none");
+  refOvl.style.display = "none";
+
+  const t = templates[idx];
+  const r = await fetch(`/api/template/${t.slug}/bounds?frame_idx=${f}`);
+  const d = await r.json();
+  if (d.error) { hint.textContent = "(ingen bounds)"; return; }
+
+  bounds = d;
+  const c = d.corners;
+  corners = { tl:{x:c.tl[0],y:c.tl[1]}, tr:{x:c.tr[0],y:c.tr[1]},
+              bl:{x:c.bl[0],y:c.bl[1]}, br:{x:c.br[0],y:c.br[1]} };
+  savedCorners = JSON.parse(JSON.stringify(corners));
+  updateFrameIndicator();
+
+  requestAnimationFrame(() => {
+    updateRefOverlay();
+    drawQuad();
+    Object.values(handles).forEach(h => h.style.display="block");
+    hint.textContent = `Ramme ${f+1} av ${currentNFrames} — klikk for plassering`;
+  });
+}
+
 async function init() {
   const r = await fetch("/api/templates");
   templates = await r.json();
@@ -407,26 +510,33 @@ function renderList(scroll=true) {
                : t.flagged          ? `<span class="tpl-status" style="color:#f80">⚑</span>`
                : t.dirty            ? `<span class="tpl-status" style="color:#cc0">✓</span>`
                : t.calibrated       ? `<span class="tpl-status" style="color:#4a4">✓</span>`
+               : t.frames > 1 && t.frames_done > 0
+                                    ? `<span class="tpl-status" style="color:#f80">${t.frames_done}/${t.frames}</span>`
                : t.skipped          ? `<span class="tpl-status" style="color:#555">✓</span>`
                : `<span class="tpl-status"></span>`;
+    const badge = t.frames > 1 ? ` <span style="color:#555;font-size:8px">[${t.frames}]</span>` : "";
     return `<div class="tpl-item ${deact} ${i===idx?"active":""}" onclick="load(${i})">
-      <span class="tpl-name">${num}. ${t.set}</span>${icon}</div>`;
+      <span class="tpl-name">${num}. ${t.set}${badge}</span>${icon}</div>`;
   }).join("");
   if (scroll) tplList.querySelector(".active")?.scrollIntoView({block:"nearest"});
 }
 
 async function load(i) {
   idx = i;
-  const t = templates[i];
+  currentFrame   = 0;
+  currentNFrames = templates[i].frames || 1;
+  const t        = templates[i];
   clearCanvas();
   Object.values(handles).forEach(h => h.style.display="none");
   refOvl.style.display = "none";
+  document.getElementById("frame-indicator").textContent = "";
   img.src = `/api/template/${t.slug}/image?_=${Date.now()}`;
   info.textContent = `${i+1} / ${templates.length} — ${t.set}`;
   offsets.textContent = "";
   hint.textContent = "Laster..."; hint.className = "";
 
-  const r = await fetch(`/api/template/${t.slug}/bounds`);
+  const frameParam = currentNFrames > 1 ? `?frame_idx=0` : "";
+  const r = await fetch(`/api/template/${t.slug}/bounds${frameParam}`);
   const d = await r.json();
   if (d.error) { hint.textContent = "(ingen bounds)"; return; }
 
@@ -435,12 +545,15 @@ async function load(i) {
   corners = { tl:{x:c.tl[0],y:c.tl[1]}, tr:{x:c.tr[0],y:c.tr[1]},
               bl:{x:c.bl[0],y:c.bl[1]}, br:{x:c.br[0],y:c.br[1]} };
   savedCorners = JSON.parse(JSON.stringify(corners));
+  updateFrameIndicator();
 
   const show = () => requestAnimationFrame(() => {
     updateRefOverlay();
     drawQuad();
     Object.values(handles).forEach(h => h.style.display="block");
-    hint.textContent = "Klikk bildet for plassering, eller dra hjørner direkte";
+    hint.textContent = currentNFrames > 1
+      ? `Ramme 1 av ${currentNFrames} — klikk for plassering`
+      : "Klikk bildet for plassering, eller dra hjørner direkte";
   });
   if (img.complete && img.naturalWidth) show();
   else img.onload = show;
@@ -551,19 +664,40 @@ function updateRefOverlay() {
 
 // ── buttons ────────────────────────────────────────────────────────────────
 async function saveCurrentCorners() {
-  const t = templates[idx];
-  await fetch(`/api/template/${t.slug}/calibrate`, {
+  const t    = templates[idx];
+  const body = {
+    tl:[corners.tl.x,corners.tl.y], tr:[corners.tr.x,corners.tr.y],
+    bl:[corners.bl.x,corners.bl.y], br:[corners.br.x,corners.br.y],
+  };
+  if (currentNFrames > 1) {
+    body.frame_idx   = currentFrame;
+    body.frame_count = currentNFrames;
+  }
+  const resp = await fetch(`/api/template/${t.slug}/calibrate`, {
     method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      tl:[corners.tl.x,corners.tl.y], tr:[corners.tr.x,corners.tr.y],
-      bl:[corners.bl.x,corners.bl.y], br:[corners.br.x,corners.br.y],
-    }),
+    body: JSON.stringify(body),
   });
-  templates[idx].calibrated = true;
-  templates[idx].dirty = false;
-  savedCorners = JSON.parse(JSON.stringify(corners));
-  renderList();
-  hint.textContent = "Lagret ✓";
+  const j = await resp.json();
+
+  if (currentNFrames > 1) {
+    templates[idx].frames_done = (templates[idx].frames_done || 0) + 1;
+    if (currentFrame < currentNFrames - 1) {
+      hint.textContent = `Ramme ${currentFrame+1} lagret ✓ — laster neste ramme...`;
+      await loadFrame(currentFrame + 1);
+    } else {
+      templates[idx].calibrated = true;
+      templates[idx].dirty      = false;
+      savedCorners = JSON.parse(JSON.stringify(corners));
+      renderList();
+      hint.textContent = `Alle ${currentNFrames} rammer kalibrert ✓`;
+    }
+  } else {
+    templates[idx].calibrated = true;
+    templates[idx].dirty      = false;
+    savedCorners = JSON.parse(JSON.stringify(corners));
+    renderList();
+    hint.textContent = "Lagret ✓";
+  }
 }
 document.getElementById("btn-save").addEventListener("click", saveCurrentCorners);
 document.getElementById("btn-next").addEventListener("click", () => {
