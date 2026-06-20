@@ -17,45 +17,10 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
+from color_generator import CAT_COLORS, BG_COLORS, EYE_COLORS
 
 PRODUCTS_DIR = Path("products")
-
-# ── Palette (mirrored from color_generator.py) ────────────────────────────
-
-CAT_COLORS = {
-    "black":   (30,  30,  35),
-    "ginger":  (210, 110, 55),
-    "rust":    (175, 75,  60),
-    "cream":   (235, 220, 195),
-    "slate":   (95,  115, 135),
-    "sage":    (120, 148, 112),
-    "blush":   (195, 140, 130),
-    "caramel": (195, 145, 80),
-}
-
-BG_COLORS = {
-    "dusty_blue":  (165, 195, 215),
-    "warm_cream":  (245, 238, 218),
-    "soft_sage":   (195, 212, 182),
-    "blush":       (238, 208, 200),
-    "pale_yellow": (248, 238, 185),
-    "stone":       (220, 215, 202),
-    "terracotta":  (205, 130, 98),
-    "forest":      (98,  138, 108),
-    "lavender":    (195, 185, 220),
-    "navy":        (58,  75,  102),
-}
-
-EYE_COLORS = {
-    "lime":         (180, 210, 80),
-    "bright_green": (80,  190, 100),
-    "sky_blue":     (80,  170, 225),
-    "ice_blue":     (160, 210, 235),
-    "coral":        (235, 110, 90),
-    "white":        (240, 238, 230),
-    "bright_gold":  (240, 200, 50),
-}
 
 ALL_COLORS = {**CAT_COLORS, **BG_COLORS, **EYE_COLORS}
 

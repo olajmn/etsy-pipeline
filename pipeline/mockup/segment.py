@@ -73,22 +73,20 @@ def _tag_image(png_path: Path) -> dict:
             time.sleep(2 ** attempt)
 
 
+def _sort_key(p: Path) -> int:
+    m = re.search(r"\d+", p.stem)
+    return int(m.group()) if m else 0
+
+
 def _collect_pngs(bundle_dir: Path) -> list[Path]:
     pngs = []
     for sub in sorted(bundle_dir.iterdir()):
         if not sub.is_dir():
             continue
-        def sort_key(p):
-            m = re.search(r"\d+", p.stem)
-            return int(m.group()) if m else 0
-        for png in sorted(sub.glob("*.png"), key=sort_key):
+        for png in sorted(sub.glob("*.png"), key=_sort_key):
             if png.with_suffix(".psd").exists():
                 pngs.append(png)
-    # Also pick up PNGs directly in the bundle folder
-    def sort_key(p):
-        m = re.search(r"\d+", p.stem)
-        return int(m.group()) if m else 0
-    for png in sorted(bundle_dir.glob("*.png"), key=sort_key):
+    for png in sorted(bundle_dir.glob("*.png"), key=_sort_key):
         if png.with_suffix(".psd").exists():
             pngs.append(png)
     return pngs

@@ -14,8 +14,6 @@ from pathlib import Path
 
 from flask import Flask, Response, jsonify, request, send_file
 
-PRODUCTS_DIR = Path("products")
-
 TEMPLATES_DIR = Path("assets/mockup-templates")
 PRODUCTS_DIR  = Path("products")
 CALIB_FILE    = Path("pipeline/mockup/calibration.json")

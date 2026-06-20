@@ -106,7 +106,7 @@ def describe_pair(folder: Path, used_names: list[str] = None) -> dict:
     metadata = json.loads(text)
 
     tags = metadata.get("tags", [])
-    metadata["tags"] = (tags + ["cat-art"] * 13)[:13]
+    metadata["tags"] = tags[:13]
     metadata["price_usd"] = PRICE_USD
 
     return metadata
