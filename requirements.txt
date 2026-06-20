@@ -1,0 +1,7 @@
+anthropic
+openai
+python-dotenv
+PyYAML
+Pillow
+requests
+python-telegram-bot

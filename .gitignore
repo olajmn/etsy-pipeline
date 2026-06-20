@@ -1,0 +1,18 @@
+# Secret keys — ALDRI på GitHub
+.env
+
+# Large asset folders
+assets/mockup-templates/all_mockuptemplates/
+assets/mockup-templates/all_mockuptemplates_psd/
+
+# Generated products
+products/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# macOS
+.DS_Store
