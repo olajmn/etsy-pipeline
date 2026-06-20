@@ -296,10 +296,19 @@ def api_generate(slug):
         cal_entry = calib.get(slug, {})
         if not cal_entry:
             return jsonify({"error": "Ikke kalibrert — kalibrere hjørnene først"}), 400
-        if "frames" in cal_entry:
-            return jsonify({"error": "Forhåndsvisning for multi-frame ikke støttet ennå"}), 400
 
-        results = mockup._generate_psd_single(print_path, psd_path, out_dir)
+        n_frames = entry.get("frames", 1)
+        if n_frames > 1:
+            cal_frames = cal_entry.get("frames", [])
+            if len(cal_frames) < n_frames or not all(f and "tl" in f for f in cal_frames):
+                done = sum(1 for f in cal_frames if f and "tl" in f)
+                return jsonify({"error": f"Kalibrér alle rammer først ({done}/{n_frames} ferdig)"}), 400
+            results = mockup._generate_psd_multi(
+                Path("products"), psd_path, out_dir,
+                prints=[print_path] * n_frames,
+            )
+        else:
+            results = mockup._generate_psd_single(print_path, psd_path, out_dir)
         if not results:
             return jsonify({"error": "generation failed"}), 500
 
