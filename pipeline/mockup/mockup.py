@@ -345,7 +345,7 @@ def _place_print_quad(bg: np.ndarray, result: np.ndarray, corners: dict,
 
     blended = _multiply_blend(bg_blend, warped)
     mask_3  = mask[:, :, np.newaxis] / 255.0
-    result[:] = (blended * mask_3 + bg * (1 - mask_3)).astype(np.uint8)
+    result[:] = (blended * mask_3 + result * (1 - mask_3)).astype(np.uint8)
 
 
 def _open_psd_bg(template_path: Path):
