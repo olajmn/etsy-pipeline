@@ -86,6 +86,7 @@ def _get_templates() -> list[dict]:
                         "set":         entry.get("set", slug),
                         "frames":      n_frames,
                         "frames_done": frames_done,
+                        "cal_frames":  cal.get("frames", []) if n_frames > 1 else [],
                         "calibrated":  is_calibrated,
                         "active":      entry.get("active", True),
                         "flagged":     entry.get("flagged", False),
@@ -351,10 +352,11 @@ body { font-family:-apple-system,sans-serif; background:#111; color:#eee;
   pointer-events:none; display:none; }
 #ovl-canvas  { position:absolute; top:0; left:0; pointer-events:none; }
 
+:root { --fc: rgba(255,136,0,0.9); --fc-faint: rgba(255,136,0,0.07); }
 .ch { position:absolute; width:40px; height:40px;
   transform:translate(-50%,-50%); cursor:crosshair; display:none;
-  border-radius:50%; background:rgba(255,160,0,0.07); }
-.ch::before,.ch::after { content:""; position:absolute; background:rgba(255,160,0,0.9); }
+  border-radius:50%; background:var(--fc-faint); }
+.ch::before,.ch::after { content:""; position:absolute; background:var(--fc); }
 .ch::before { top:50%; left:0; right:0; height:0.5px; margin-top:-0.25px; }
 .ch::after  { left:50%; top:0; bottom:0; width:0.5px; margin-left:-0.25px; }
 
@@ -422,6 +424,9 @@ button { padding:7px 16px; border:none; border-radius:6px;
 </div>
 
 <script>
+const FRAME_COLORS = ["#ff8800", "#4488ff", "#44cc66"];
+const FRAME_FAINTS = ["rgba(255,136,0,0.07)", "rgba(68,136,255,0.07)", "rgba(68,204,102,0.07)"];
+
 let templates = [], idx = 0, bounds = null;
 let corners = {tl:{x:0,y:0}, tr:{x:0,y:0}, bl:{x:0,y:0}, br:{x:0,y:0}};
 let savedCorners = null;
@@ -430,6 +435,7 @@ let placing = false;
 let corner1 = null;
 let currentFrame = 0;
 let currentNFrames = 1;
+let allFrameCorners = [];  // saved corner sets per frame index
 
 const img       = document.getElementById("template-img");
 const refOvl    = document.getElementById("ref-overlay");
@@ -459,6 +465,34 @@ function psdToWrap(x, y) {
            y: y*(img.clientHeight/bounds.psd_h) };
 }
 
+function setFrameColor(f) {
+  const c = FRAME_COLORS[f] || FRAME_COLORS[0];
+  const faint = FRAME_FAINTS[f] || FRAME_FAINTS[0];
+  document.documentElement.style.setProperty("--fc", c);
+  document.documentElement.style.setProperty("--fc-faint", faint);
+}
+
+function drawX(ctx, x, y, color, size=9) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth   = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(x-size, y-size); ctx.lineTo(x+size, y+size);
+  ctx.moveTo(x+size, y-size); ctx.lineTo(x-size, y+size);
+  ctx.stroke();
+}
+
+function drawQuadOutline(ctx, pts, color) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth   = 1.5;
+  ctx.setLineDash([5, 3]);
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.closePath();
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
 function updateFrameIndicator() {
   document.getElementById("frame-indicator").textContent =
     currentNFrames > 1 ? `Ramme ${currentFrame+1} av ${currentNFrames}` : "";
@@ -466,6 +500,7 @@ function updateFrameIndicator() {
 
 async function loadFrame(f) {
   currentFrame = f;
+  setFrameColor(f);
   clearCanvas();
   Object.values(handles).forEach(h => h.style.display="none");
   refOvl.style.display = "none";
@@ -525,6 +560,12 @@ async function load(i) {
   idx = i;
   currentFrame   = 0;
   currentNFrames = templates[i].frames || 1;
+  // Pre-populate saved corners from existing calibration data
+  allFrameCorners = (templates[i].cal_frames || []).map(f => f && f.tl ? {
+    tl:{x:f.tl[0],y:f.tl[1]}, tr:{x:f.tr[0],y:f.tr[1]},
+    bl:{x:f.bl[0],y:f.bl[1]}, br:{x:f.br[0],y:f.br[1]}
+  } : null);
+  setFrameColor(0);
   const t        = templates[i];
   clearCanvas();
   Object.values(handles).forEach(h => h.style.display="none");
@@ -639,8 +680,19 @@ function drawQuad() {
   const ctx = ovlCanvas.getContext("2d");
   ctx.clearRect(0, 0, ovlCanvas.width, ovlCanvas.height);
 
-  const pts = ["tl","tr","br","bl"].map(k => psdToWrap(corners[k].x, corners[k].y));
+  // Draw saved frames (other than current) as colored X markers + faint outline
+  allFrameCorners.forEach((fc, fi) => {
+    if (!fc || fi === currentFrame) return;
+    const color = FRAME_COLORS[fi] || FRAME_COLORS[0];
+    const pts   = ["tl","tr","br","bl"].map(k => psdToWrap(fc[k].x, fc[k].y));
+    drawQuadOutline(ctx, pts, color + "66");
+    ["tl","tr","bl","br"].forEach(k => {
+      const {x,y} = psdToWrap(fc[k].x, fc[k].y);
+      drawX(ctx, x, y, color);
+    });
+  });
 
+  // Position current frame handles
   Object.entries(handles).forEach(([key,el]) => {
     const {x,y} = psdToWrap(corners[key].x, corners[key].y);
     el.style.left=x+"px"; el.style.top=y+"px";
@@ -680,6 +732,7 @@ async function saveCurrentCorners() {
   const j = await resp.json();
 
   if (currentNFrames > 1) {
+    allFrameCorners[currentFrame] = JSON.parse(JSON.stringify(corners));
     templates[idx].frames_done = (templates[idx].frames_done || 0) + 1;
     if (currentFrame < currentNFrames - 1) {
       hint.textContent = `Ramme ${currentFrame+1} lagret ✓ — laster neste ramme...`;
