@@ -13,6 +13,14 @@ import uuid
 from pathlib import Path
 from PIL import Image, ImageChops
 
+from palette import (
+    DARK_CAT_ANCHORS, LIGHT_CAT_ANCHORS, MUTED_BG_ANCHORS,
+    WARM_BG_ANCHORS, DARK_BG_ANCHORS, EYE_ANCHORS, TONAL_EYE_ANCHORS,
+    _CAT_DELTA, _BG_DELTA, _EYE_DELTA,
+    _sample_anchor,
+    _pick_colors, _pick_tonal_colors, _pick_noir_colors,
+)
+
 SILHOUETTES_DIR    = Path("assets/silhouettes")
 COMPOSITIONS_DIR   = Path("assets/compositions")
 OUTPUT_DIR         = Path("generated/single")
@@ -22,7 +30,7 @@ SCATTER_OUTPUT_DIR = Path("generated/scatter")
 LAYERED_OUTPUT_DIR = Path("generated/layered")
 LAYERED_PAIR_OUT_DIR = Path("products")
 
-CAT_TEMPLATE = Path("assets/composition-example.png")
+CAT_TEMPLATE = Path("assets/precedents/portrait.png")
 
 
 def next_generation_dir(base_dir: Path) -> Path:
@@ -34,101 +42,6 @@ def next_generation_dir(base_dir: Path) -> Path:
     gen_dir  = base_dir / f"generation-{next_n}"
     gen_dir.mkdir()
     return gen_dir
-
-
-# ── Color palette ─────────────────────────────────────────────────────────────
-# Scandinavian / minimalist palette — name + RGB
-
-CAT_COLORS = {
-    "black":     (30,  30,  35),
-    "ginger":    (210, 110, 55),
-    "rust":      (175, 75,  60),
-    "cream":     (235, 220, 195),
-    "slate":     (95,  115, 135),
-    "sage":      (120, 148, 112),
-    "blush":     (195, 140, 130),
-    "caramel":   (195, 145, 80),
-}
-
-BG_COLORS = {
-    "dusty_blue":  (165, 195, 215),
-    "warm_cream":  (245, 238, 218),
-    "soft_sage":   (195, 212, 182),
-    "blush":       (238, 208, 200),
-    "pale_yellow": (248, 238, 185),
-    "stone":       (220, 215, 202),
-    "terracotta":  (205, 130, 98),
-    "forest":      (98,  138, 108),
-    "lavender":    (195, 185, 220),
-    "navy":        (58,  75,  102),
-}
-
-EYE_COLORS = {
-    "lime":        (180, 210, 80),
-    "bright_green":(80,  190, 100),
-    "sky_blue":    (80,  170, 225),
-    "ice_blue":    (160, 210, 235),
-    "coral":       (235, 110, 90),
-    "white":       (240, 238, 230),
-    "bright_gold": (240, 200, 50),
-}
-
-# Eye colors that clash with specific cat colors
-BAD_EYE_PAIRS = {
-    ("cream",    "white"),
-    ("cream",    "bright_gold"),
-    ("caramel",  "bright_gold"),
-    ("ginger",   "coral"),
-    ("rust",     "coral"),
-}
-
-# Color combinations with too little contrast
-BAD_PAIRS = {
-    ("cream",  "warm_cream"),
-    ("cream",  "pale_yellow"),
-    ("sage",   "soft_sage"),
-    ("sage",   "forest"),
-    ("blush",  "blush"),
-    ("slate",  "navy"),
-}
-
-# Color temperature groups for collection harmony
-_WARM_CATS = ["ginger", "rust", "caramel"]
-_COOL_CATS = ["black", "slate"]
-_SOFT_CATS = ["sage", "cream", "blush"]
-
-_WARM_BGS  = ["warm_cream", "pale_yellow", "blush", "terracotta"]
-_COOL_BGS  = ["dusty_blue", "navy", "lavender", "forest"]
-_SOFT_BGS  = ["stone", "soft_sage"]
-
-
-def _bg_pool(bg_name: str) -> list:
-    """Return the temperature pool a background color belongs to."""
-    if bg_name in _WARM_BGS: return _WARM_BGS
-    if bg_name in _COOL_BGS: return _COOL_BGS
-    return _SOFT_BGS
-
-
-def _pick_contrasting_bg(cat_name: str) -> str:
-    """Pick a background color that contrasts with the cat's temperature."""
-    if cat_name in _WARM_CATS:
-        pool = _COOL_BGS
-    elif cat_name in _COOL_CATS:
-        pool = _WARM_BGS
-    else:
-        pool = _SOFT_BGS
-    return random.choice(pool)
-
-
-def _pick_colors() -> tuple:
-    """Pick a random, harmonious color combination."""
-    while True:
-        cat_name = random.choice(list(CAT_COLORS.keys()))
-        bg_name  = random.choice(list(BG_COLORS.keys()))
-        if (cat_name, bg_name) not in BAD_PAIRS:
-            eye_name = random.choice(list(EYE_COLORS.keys()))
-            if (cat_name, eye_name) not in BAD_EYE_PAIRS:
-                return CAT_COLORS[cat_name], cat_name, BG_COLORS[bg_name], bg_name, EYE_COLORS[eye_name], eye_name
 
 
 _silhouette_queue: list = []
@@ -207,7 +120,6 @@ CANVAS_SIZES = {
     "story":    (1080, 1920),   # 9:16 — Instagram story/reel
 }
 
-CANVAS_W, CANVAS_H = CANVAS_SIZES["plakat"]
 CAT_SCALE = 0.55   # default width: 55% of canvas width
 
 # Per-cat scale override (cat-3 is horizontal and appears larger)
@@ -381,16 +293,16 @@ def generate_composition(comp_path: Path = None, out_dir: Path = None) -> Path:
         options = list(COMPOSITIONS_DIR.glob("*.png"))
         comp_path = random.choice(options)
 
-    color1_name = random.choice(list(BG_COLORS.keys()))
-    color2_name = random.choice(list(BG_COLORS.keys()))
+    color1_name, color1_rgb = _sample_anchor(MUTED_BG_ANCHORS, _BG_DELTA)
+    color2_name, color2_rgb = _sample_anchor(MUTED_BG_ANCHORS, _BG_DELTA)
     while color2_name == color1_name:
-        color2_name = random.choice(list(BG_COLORS.keys()))
+        color2_name, color2_rgb = _sample_anchor(MUTED_BG_ANCHORS, _BG_DELTA)
 
     print(f"  Composition: {comp_path.name}")
-    print(f"  Color 1:     {color1_name}")
-    print(f"  Color 2:     {color2_name}")
+    print(f"  Color 1:     {color1_name} {color1_rgb}")
+    print(f"  Color 2:     {color2_name} {color2_rgb}")
 
-    result   = _recolor_composition(comp_path, BG_COLORS[color1_name], BG_COLORS[color2_name])
+    result   = _recolor_composition(comp_path, color1_rgb, color2_rgb)
     stem     = comp_path.stem.replace(" ", "_")
     folder   = out_dir or COMP_OUTPUT_DIR
     filename = folder / f"{stem}_{color1_name}_{color2_name}_{uuid.uuid4().hex[:6]}.png"
@@ -461,35 +373,48 @@ def generate_scatter(count: int = 60, out_dir: Path = None) -> Path:
     return filename
 
 
-def _build_layered_image(cat_rgb=None, cat_name=None, eye_rgb=None, eye_name=None, bg2_name=None) -> tuple:
-    """Build a layered image. Returns (image, name_stem, bg1_name, bg2_name)."""
+def _build_layered_image(cat_rgb=None, cat_name=None, eye_rgb=None, eye_name=None,
+                          bg_rgb=None, bg_name=None, bg_anchors=None) -> tuple:
+    """Build a layered portrait image.
+    Returns (image, name_stem, bg1_name, bg2_name, bg1_rgb, bg2_rgb).
+    bg2 = the passed bg (accent/bottom strip); bg1 = freshly sampled (dominant/top).
+    bg_anchors: which anchor dict to sample bg1 from (default: MUTED_BG_ANCHORS).
+    """
     if cat_rgb is None:
-        cat_rgb, cat_name, _, _, eye_rgb, eye_name = _pick_colors()
-    if bg2_name is None:
-        bg1_name = random.choice(list(BG_COLORS.keys()))
-        bg2_name = random.choice(list(BG_COLORS.keys()))
-        while bg2_name == bg1_name or (bg1_name, bg2_name) in BAD_PAIRS:
-            bg2_name = random.choice(list(BG_COLORS.keys()))
+        cat_name, cat_rgb = _sample_anchor(DARK_CAT_ANCHORS, _CAT_DELTA)
+        eye_name, eye_rgb = _sample_anchor(EYE_ANCHORS,      _EYE_DELTA)
+
+    def _too_similar(c1, c2):
+        return max(abs(a - b) for a, b in zip(c1, c2)) < 30
+
+    anchors = bg_anchors or MUTED_BG_ANCHORS
+    bg1_name, bg1_rgb = _sample_anchor(anchors, _BG_DELTA)
+    if bg_rgb is not None:
+        bg2_rgb  = bg_rgb
+        bg2_name = bg_name or "accent"
+        while bg1_name == bg2_name or _too_similar(bg1_rgb, bg2_rgb):
+            bg1_name, bg1_rgb = _sample_anchor(anchors, _BG_DELTA)
     else:
-        pool = _bg_pool(bg2_name)
-        options = [b for b in pool if b != bg2_name]
-        bg1_name = random.choice(options) if options else random.choice(list(BG_COLORS.keys()))
+        bg2_name, bg2_rgb = _sample_anchor(anchors, _BG_DELTA)
+        while bg2_name == bg1_name or _too_similar(bg1_rgb, bg2_rgb):
+            bg2_name, bg2_rgb = _sample_anchor(anchors, _BG_DELTA)
+
     print(f"  Cat:        {cat_name}")
     print(f"  Eyes:       {eye_name}")
     print(f"  Background: {bg1_name} + {bg2_name}")
     cat_rgba = _colorize_rgba(CAT_TEMPLATE, cat_rgb, eye_rgb)
     w, h = cat_rgba.size
     split_y = int(h * 0.6694)  # proportion measured from color-pallette-example.png
-    bg = Image.new("RGB", (w, h), BG_COLORS[bg1_name])
-    bg.paste(Image.new("RGB", (w, h - split_y), BG_COLORS[bg2_name]), (0, split_y))
+    bg = Image.new("RGB", (w, h), bg1_rgb)
+    bg.paste(Image.new("RGB", (w, h - split_y), bg2_rgb), (0, split_y))
     bg.paste(cat_rgba, (0, 0), mask=cat_rgba.split()[3])
     stem = f"layered_{cat_name}_{eye_name}eyes_{bg1_name}_{bg2_name}_{uuid.uuid4().hex[:6]}"
-    return bg, stem, bg1_name, bg2_name
+    return bg, stem, bg1_name, bg2_name, bg1_rgb, bg2_rgb
 
 
 def generate_layered(out_dir: Path = None) -> Path:
     """Combine background template + transparent cat composition. Saves full size."""
-    img, stem, _, _ = _build_layered_image()
+    img, stem, *_ = _build_layered_image()
     folder = out_dir or LAYERED_OUTPUT_DIR
     folder.mkdir(parents=True, exist_ok=True)
     filename = folder / f"{stem}.png"
@@ -498,71 +423,75 @@ def generate_layered(out_dir: Path = None) -> Path:
     return filename
 
 
-def generate_layered_pair(out_dir: Path = None) -> tuple:
-    """Generate a layered poster + multi-cat portrait with matching colors in one folder."""
-    cat_rgb, cat_name, _, _, eye_rgb, eye_name = _pick_colors()
-    bg2_name = _pick_contrasting_bg(cat_name)
+def _hue_dist(h1: float, h2: float) -> float:
+    """Circular distance between two hue angles (0–360°)."""
+    d = abs(h1 - h2) % 360
+    return min(d, 360 - d)
 
+
+def generate_layered_pair(out_dir: Path = None) -> tuple:
+    """Generate two cats: katt_1 tonal (lys+varm) + katt_2 noir (mørk+kjølig).
+    Guarantees ≥60° hue distance between the two cats (if both are chromatic).
+    """
     folder = out_dir or LAYERED_PAIR_OUT_DIR
     folder.mkdir(parents=True, exist_ok=True)
 
-    print("  [1/2] Layered poster")
-    img, stem, _, bg2_name = _build_layered_image(cat_rgb=cat_rgb, cat_name=cat_name,
-                                                   eye_rgb=eye_rgb, eye_name=eye_name,
-                                                   bg2_name=bg2_name)
-    layered_path = folder / f"{stem}.png"
-    img.save(layered_path)
-    print(f"  Saved:      {layered_path}")
+    print("  [katt_1 — tonal]")
+    cat_rgb, cat_name, bg_rgb, bg_name, eye_rgb, eye_name = _pick_tonal_colors()
+    katt1_hsl = LIGHT_CAT_ANCHORS.get(cat_name, (0, 0, 0))
 
-    print("  [2/2] Multi-cat portrait")
-    portrait_path = generate_multi(out_dir=folder, canvas_size="portrett",
-                                   cat_rgb=cat_rgb, cat_name=cat_name,
-                                   bg_rgb=BG_COLORS[bg2_name], bg_name=bg2_name,
-                                   eye_rgb=eye_rgb, eye_name=eye_name)
+    print("  [katt_2 — noir]")
+    for _ in range(30):
+        cat_rgb2, cat_name2, bg_rgb2, bg_name2, eye_rgb2, eye_name2 = _pick_noir_colors()
+        katt2_hsl = DARK_CAT_ANCHORS.get(cat_name2, (0, 0, 0))
+        both_chromatic = katt1_hsl[1] > 10 and katt2_hsl[1] > 10
+        if not both_chromatic or _hue_dist(katt1_hsl[0], katt2_hsl[0]) >= 60:
+            break
 
-    return layered_path, portrait_path
+    img, stem, *_ = _build_layered_image(cat_rgb=cat_rgb, cat_name=cat_name,
+                                          eye_rgb=eye_rgb, eye_name=eye_name,
+                                          bg_rgb=bg_rgb, bg_name=bg_name,
+                                          bg_anchors=WARM_BG_ANCHORS)
+    katt1_portrait = folder / f"{stem}.png"
+    img.save(katt1_portrait)
+    katt1_comp = generate_multi(out_dir=folder, canvas_size="portrett",
+                                cat_rgb=cat_rgb, cat_name=cat_name,
+                                bg_rgb=bg_rgb, bg_name=bg_name,
+                                eye_rgb=eye_rgb, eye_name=eye_name)
+
+    img2, stem2, *_ = _build_layered_image(cat_rgb=cat_rgb2, cat_name=cat_name2,
+                                            eye_rgb=eye_rgb2, eye_name=eye_name2,
+                                            bg_rgb=bg_rgb2, bg_name=bg_name2,
+                                            bg_anchors=DARK_BG_ANCHORS)
+    katt2_portrait = folder / f"{stem2}.png"
+    img2.save(katt2_portrait)
+    katt2_comp = generate_multi(out_dir=folder, canvas_size="portrett",
+                                cat_rgb=cat_rgb2, cat_name=cat_name2,
+                                bg_rgb=bg_rgb2, bg_name=bg_name2,
+                                eye_rgb=eye_rgb2, eye_name=eye_name2)
+
+    return katt1_portrait, katt1_comp, katt2_portrait, katt2_comp
 
 
 def _pick_collection_colors() -> list:
-    """
-    Pick 3 harmonious color combos for a collection using color temperature contrast.
-    Pair A: warm cat on cool bg
-    Pair B: cool cat on warm bg
-    Pair C: soft cat on soft bg (ties the collection together)
-    """
-    def pick(cat_pool, bg_pool, used_cats, used_bgs):
-        cats = [c for c in cat_pool if c not in used_cats]
-        bgs  = [b for b in bg_pool  if b not in used_bgs]
-        random.shuffle(cats)
-        random.shuffle(bgs)
-        for cat_name in cats:
-            for bg_name in bgs:
-                if (cat_name, bg_name) not in BAD_PAIRS:
-                    valid_eyes = [e for e in EYE_COLORS if (cat_name, e) not in BAD_EYE_PAIRS]
-                    eye_name = random.choice(valid_eyes)
-                    return (CAT_COLORS[cat_name], cat_name,
-                            BG_COLORS[bg_name],  bg_name,
-                            EYE_COLORS[eye_name], eye_name)
-        return None
-
-    used_cats, used_bgs, combos = [], [], []
-    for cat_pool, bg_pool in [
-        (_WARM_CATS, _COOL_BGS),
-        (_COOL_CATS, _WARM_BGS),
-        (_SOFT_CATS, _SOFT_BGS),
-    ]:
-        combo = pick(cat_pool, bg_pool, used_cats, used_bgs)
-        if combo:
-            combos.append(combo)
-            used_cats.append(combo[1])
-            used_bgs.append(combo[3])
+    """Pick 3 color combos for a collection, ensuring no repeated cat anchors."""
+    all_cats  = {**DARK_CAT_ANCHORS, **LIGHT_CAT_ANCHORS}
+    used_cats = []
+    combos    = []
+    for _ in range(3):
+        cat_name, cat_rgb = _sample_anchor(all_cats,         _CAT_DELTA)
+        while cat_name in used_cats:
+            cat_name, cat_rgb = _sample_anchor(all_cats,     _CAT_DELTA)
+        bg_name,  bg_rgb  = _sample_anchor(MUTED_BG_ANCHORS, _BG_DELTA)
+        eye_name, eye_rgb = _sample_anchor(EYE_ANCHORS,      _EYE_DELTA)
+        combos.append((cat_rgb, cat_name, bg_rgb, bg_name, eye_rgb, eye_name))
+        used_cats.append(cat_name)
     return combos
 
 
 def generate_collection(base_dir: Path = None) -> list:
     """
     Generate 3 harmonious pairs as a collection.
-    Warm cat / cool cat / soft cat — each on a contrasting background.
     Saves to products/collection-N/pair-A|B|C/
     """
     root = base_dir or LAYERED_PAIR_OUT_DIR
@@ -573,23 +502,23 @@ def generate_collection(base_dir: Path = None) -> list:
     collection_dir = root / f"collection-{n}"
     collection_dir.mkdir()
 
-    print(f"\n  Collection {n}  (3 pairs — warm / cool / soft)")
+    print(f"\n  Collection {n}  (3 pairs)")
     print(f"  {'─' * 42}")
 
     combos  = _pick_collection_colors()
     results = []
 
-    for i, (cat_rgb, cat_name, _, bg_name, eye_rgb, eye_name) in enumerate(combos):
+    for i, (cat_rgb, cat_name, bg_rgb, bg_name, eye_rgb, eye_name) in enumerate(combos):
         label    = ["A", "B", "C"][i]
         pair_dir = collection_dir / f"pair-{label}"
         pair_dir.mkdir()
 
         print(f"\n  [Pair {label}]  {cat_name} cat / {eye_name} eyes / {bg_name} bg")
 
-        img, stem, _, bg2_name = _build_layered_image(
+        img, stem, _, bg2_name, _, bg2_rgb = _build_layered_image(
             cat_rgb=cat_rgb, cat_name=cat_name,
             eye_rgb=eye_rgb, eye_name=eye_name,
-            bg2_name=bg_name,
+            bg_rgb=bg_rgb, bg_name=bg_name,
         )
         layered_path = pair_dir / f"{stem}.png"
         img.save(layered_path)
@@ -598,7 +527,7 @@ def generate_collection(base_dir: Path = None) -> list:
         portrait_path = generate_multi(
             out_dir=pair_dir, canvas_size="portrett",
             cat_rgb=cat_rgb, cat_name=cat_name,
-            bg_rgb=BG_COLORS[bg2_name], bg_name=bg2_name,
+            bg_rgb=bg2_rgb, bg_name=bg2_name,
             eye_rgb=eye_rgb, eye_name=eye_name,
         )
         results.append((layered_path, portrait_path))

@@ -701,7 +701,7 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": false
   },
   {
     "template": "0017_minimal_room_light_wood_shelf",
@@ -1161,7 +1161,7 @@
       "minimalist decor",
       "neutral tones"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -1329,7 +1329,7 @@
       "white chair",
       "wooden desk"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -1371,7 +1371,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "has_fg": true
   },
   {
     "template": "0030_living_room_green_sofa",
@@ -2005,7 +2006,7 @@
       "minimalist workspace",
       "books"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -2047,7 +2048,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "has_fg": true
   },
   {
     "template": "0039_living_room_light_sofa",
@@ -2157,7 +2159,7 @@
       "natural light",
       "gallery wall"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -2373,7 +2375,7 @@
     "template": "0044_entryway_minimal_console",
     "path": "all_mockuptemplates_psd/0044_entryway_minimal_console.psd",
     "set": "entryway_minimal_console",
-    "frames": 3,
+    "frames": 2,
     "frame": "dark_wood",
     "style": "minimal_light",
     "warmth": "neutral",
@@ -2453,7 +2455,7 @@
       "bright interior",
       "side light"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -2495,7 +2497,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "has_fg": true
   },
   {
     "template": "0046_office_white_wall_window",
@@ -2517,7 +2520,7 @@
       "desk lamp",
       "minimal aesthetic"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -2639,7 +2642,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "has_fg": true
   },
   {
     "template": "0047_hallway_white_console",
@@ -2661,7 +2665,7 @@
       "entryway",
       "side light"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -3529,7 +3533,7 @@
       "clean space",
       "blank frame"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -3791,7 +3795,7 @@
       "side light",
       "modern aesthetic"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -3965,7 +3969,7 @@
       "shadow play",
       "empty space"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -4053,7 +4057,7 @@
       "cream rug",
       "minimalist"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -4533,7 +4537,7 @@
       "desk chair",
       "books"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -4655,7 +4659,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "has_fg": true
   },
   {
     "template": "0082_bedroom_white_minimal",
@@ -4677,7 +4682,7 @@
       "warm lighting",
       "nightstand"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -4741,7 +4746,7 @@
       "cozy seating",
       "minimal decor"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -4783,7 +4788,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "has_fg": true
   },
   {
     "template": "0084_living_room_reading_corner",
@@ -5015,7 +5021,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "not_sure": false
   },
   {
     "template": "0087_living_room_minimal_light_wood",
@@ -5081,7 +5088,7 @@
       "minimal decor",
       "gold ornaments"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -5257,7 +5264,7 @@
       "bookshelf",
       "mid-century modern"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -5369,7 +5376,7 @@
     "template": "0094_bedroom_colorful_teal_wall",
     "path": "all_mockuptemplates_psd/0094_bedroom_colorful_teal_wall.psd",
     "set": "bedroom_colorful_teal_wall",
-    "frames": 3,
+    "frames": 1,
     "frame": "light_wood",
     "style": "kids",
     "warmth": "warm",
@@ -5553,7 +5560,7 @@
       "modern chair",
       "minimalist"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -6245,7 +6252,7 @@
       "bright interior",
       "spa aesthetic"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -6393,7 +6400,7 @@
       "minimalist",
       "workspace"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -6563,7 +6570,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "not_sure": true
   },
   {
     "template": "0109_entryway_blue_wall",
@@ -6733,7 +6741,7 @@
       "bright",
       "garden view"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -6901,7 +6909,7 @@
       "bright",
       "minimalist"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -8645,7 +8653,7 @@
     "template": "0143_minimal_light_room_white_frame",
     "path": "all_mockuptemplates_psd/0143_minimal_light_room_white_frame.psd",
     "set": "minimal_light_room_white_frame",
-    "frames": 2,
+    "frames": 1,
     "frame": "white",
     "style": "minimal_light",
     "warmth": "warm",
@@ -10640,7 +10648,7 @@
       "herringbone floor",
       "sunlight"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -11326,7 +11334,7 @@
     "template": "0204_workspace_mint_green_desk",
     "path": "all_mockuptemplates_psd/0204_workspace_mint_green_desk.psd",
     "set": "workspace_mint_green_desk",
-    "frames": 2,
+    "frames": 1,
     "frame": "white",
     "style": "minimal_light",
     "warmth": "cool",
@@ -11370,7 +11378,7 @@
     "template": "0205_shelf_green_wall_plants",
     "path": "all_mockuptemplates_psd/0205_shelf_green_wall_plants.psd",
     "set": "shelf_green_wall_plants",
-    "frames": 2,
+    "frames": 1,
     "frame": "white",
     "style": "minimal_light",
     "warmth": "cool",
@@ -11386,7 +11394,7 @@
       "bright",
       "side light"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -11758,7 +11766,7 @@
       "desktop setup",
       "bright"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -13918,7 +13926,7 @@
     "template": "0269_living_room_minimalist_frames",
     "path": "all_mockuptemplates_psd/0269_living_room_minimalist_frames.psd",
     "set": "living_room_minimalist_frames",
-    "frames": 2,
+    "frames": 1,
     "frame": "light_wood",
     "style": "minimal_light",
     "warmth": "warm",
@@ -14072,7 +14080,7 @@
     "template": "0273_living_room_plants_natural_light",
     "path": "all_mockuptemplates_psd/0273_living_room_plants_natural_light.psd",
     "set": "living_room_plants_natural_light",
-    "frames": 2,
+    "frames": 1,
     "frame": "light_wood",
     "style": "minimal_light",
     "warmth": "warm",
@@ -14094,7 +14102,7 @@
     "template": "0274_living_room_minimal_sofa",
     "path": "all_mockuptemplates_psd/0274_living_room_minimal_sofa.psd",
     "set": "living_room_minimal_sofa",
-    "frames": 2,
+    "frames": 1,
     "frame": "light_wood",
     "style": "minimal_light",
     "warmth": "warm",
@@ -14490,7 +14498,7 @@
     "template": "0285_minimal_living_room_natural_light",
     "path": "all_mockuptemplates_psd/0285_minimal_living_room_natural_light.psd",
     "set": "minimal_living_room_natural_light",
-    "frames": 2,
+    "frames": 1,
     "frame": "light_wood",
     "style": "minimal_light",
     "warmth": "warm",
@@ -15371,7 +15379,7 @@
     "template": "0306_living_room_window_bench",
     "path": "all_mockuptemplates_psd/0306_living_room_window_bench.psd",
     "set": "living_room_window_bench",
-    "frames": 3,
+    "frames": 1,
     "frame": "light_wood",
     "style": "minimal_light",
     "warmth": "warm",
@@ -15393,7 +15401,7 @@
     "template": "0307_living_room_minimal_light_wood",
     "path": "all_mockuptemplates_psd/0307_living_room_minimal_light_wood.psd",
     "set": "living_room_minimal_light_wood",
-    "frames": 3,
+    "frames": 1,
     "frame": "light_wood",
     "style": "minimal_light",
     "warmth": "warm",
@@ -15415,7 +15423,7 @@
     "template": "0308_dining_room_light_wood",
     "path": "all_mockuptemplates_psd/0308_dining_room_light_wood.psd",
     "set": "dining_room_light_wood",
-    "frames": 3,
+    "frames": 1,
     "frame": "light_wood",
     "style": "minimal_light",
     "warmth": "warm",
@@ -15437,7 +15445,7 @@
     "template": "0309_dining_room_light_wood_table",
     "path": "all_mockuptemplates_psd/0309_dining_room_light_wood_table.psd",
     "set": "dining_room_light_wood_table",
-    "frames": 3,
+    "frames": 1,
     "frame": "light_wood",
     "style": "minimal_light",
     "warmth": "warm",
@@ -16757,7 +16765,7 @@
     "template": "0343_bedroom_window_light_wood_frames",
     "path": "all_mockuptemplates_psd/0343_bedroom_window_light_wood_frames.psd",
     "set": "bedroom_window_light_wood_frames",
-    "frames": 2,
+    "frames": 1,
     "frame": "light_wood",
     "style": "minimal_light",
     "warmth": "warm",
@@ -16779,7 +16787,7 @@
     "template": "0344_minimal_room_natural_light",
     "path": "all_mockuptemplates_psd/0344_minimal_room_natural_light.psd",
     "set": "minimal_room_natural_light",
-    "frames": 2,
+    "frames": 1,
     "frame": "light_wood",
     "style": "minimal_light",
     "warmth": "warm",
@@ -17037,7 +17045,7 @@
       "bright interior",
       "scandinavian style"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -17351,7 +17359,7 @@
     "template": "0359_minimalist_room_wood_frames",
     "path": "all_mockuptemplates_psd/0359_minimalist_room_wood_frames.psd",
     "set": "minimalist_room_wood_frames",
-    "frames": 2,
+    "frames": 1,
     "frame": "light_wood",
     "style": "minimal_light",
     "warmth": "warm",
@@ -17373,7 +17381,7 @@
     "template": "0360_minimal_light_room_wooden_frames",
     "path": "all_mockuptemplates_psd/0360_minimal_light_room_wooden_frames.psd",
     "set": "minimal_light_room_wooden_frames",
-    "frames": 2,
+    "frames": 1,
     "frame": "light_wood",
     "style": "minimal_light",
     "warmth": "warm",
@@ -17395,7 +17403,7 @@
     "template": "0361_minimal_living_room_wood_window",
     "path": "all_mockuptemplates_psd/0361_minimal_living_room_wood_window.psd",
     "set": "minimal_living_room_wood_window",
-    "frames": 2,
+    "frames": 1,
     "frame": "light_wood",
     "style": "minimal_light",
     "warmth": "warm",
@@ -17519,7 +17527,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0364_living_room_beige_sofa",
@@ -17583,7 +17592,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0365_living_room_beige_sofa",
@@ -17647,7 +17657,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0366_living_room_neutral_sofa",
@@ -17711,7 +17722,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0367_living_room_minimal_sofa",
@@ -17775,7 +17787,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0368_living_room_minimalist_sofa",
@@ -17839,7 +17852,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0369_living_room_modern_lounge",
@@ -17903,7 +17917,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0370_living_room_neutral_sofa",
@@ -17925,7 +17940,7 @@
       "minimalist decor",
       "throw blanket"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -18031,7 +18046,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0372_living_room_concrete_wall",
@@ -18053,7 +18069,7 @@
       "modern aesthetic",
       "side light"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -18095,7 +18111,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0373_living_room_rattan_chairs",
@@ -18159,7 +18176,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0374_living_room_neutral_sofa",
@@ -18223,7 +18241,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0375_living_room_white_sofa",
@@ -18287,7 +18306,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0376_bedroom_daybed_white_wall",
@@ -18351,7 +18371,9 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true,
+    "skipped": true
   },
   {
     "template": "0377_living_room_white_sofa",
@@ -18373,7 +18395,7 @@
       "natural light",
       "modern elegant"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -18415,7 +18437,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0378_living_room_black_frame_sofa",
@@ -18479,7 +18502,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0379_kitchen_white_marble_counter",
@@ -18543,7 +18567,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0380_kitchen_black_white_marble",
@@ -18607,7 +18632,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0381_kitchen_black_white_marble",
@@ -18671,7 +18697,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0382_kitchen_white_countertop",
@@ -18735,7 +18762,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0383_office_minimal_workspace",
@@ -18757,7 +18785,7 @@
       "scandinavian",
       "workspace"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -18863,7 +18891,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0385_office_minimal_workspace",
@@ -18927,7 +18956,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0386_kitchen_white_counter_black_frames",
@@ -18991,7 +19021,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0387_kitchen_white_counter",
@@ -19055,7 +19086,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0388_office_desk_beige_wall",
@@ -19119,7 +19151,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0389_office_desk_warm_minimalist",
@@ -19183,7 +19216,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0390_office_desk_minimal",
@@ -19247,7 +19281,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0391_office_desk_beige_wall",
@@ -19311,7 +19346,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0392_kitchen_white_minimalist",
@@ -19375,7 +19411,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0393_kitchen_white_counter",
@@ -19439,7 +19476,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0394_kitchen_white_modern",
@@ -19461,7 +19499,7 @@
       "geometric artwork",
       "scandinavian"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -19525,7 +19563,7 @@
       "minimalist decor",
       "warm tones"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -19631,7 +19669,9 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true,
+    "not_sure": false
   },
   {
     "template": "0397_living_room_cream_sofa",
@@ -19695,7 +19735,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0398_living_room_cream_sofa",
@@ -19717,7 +19758,7 @@
       "side table",
       "bright"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -19759,7 +19800,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0399_living_room_matisse_prints",
@@ -19781,7 +19823,7 @@
       "side light",
       "daylight"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -19823,7 +19865,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0400_living_room_neutral_boho",
@@ -19845,7 +19888,7 @@
       "round rug",
       "side table"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -20229,7 +20272,7 @@
       "cream sofa",
       "bright and airy"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -20613,7 +20656,7 @@
       "coffee table",
       "bright"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -21829,7 +21872,7 @@
       "minimalist",
       "scandinavian"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -22533,7 +22576,7 @@
       "minimalist decor",
       "warm tones"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -22725,7 +22768,7 @@
       "neutral palette",
       "woven vase"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -22767,7 +22810,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": false
   },
   {
     "template": "0446_minimalist_entryway_wooden_bench",
@@ -22789,7 +22833,7 @@
       "botanical",
       "bright"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -25221,7 +25265,7 @@
       "framed art",
       "geometric decor"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -25594,7 +25638,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0503_cafe_window_seating",
@@ -26446,7 +26491,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0521_kitchen_marble_counter",
@@ -29304,7 +29350,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0586_living_room_minimalist_seating",
@@ -29348,7 +29395,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0587_entryway_gray_paneled_wall",
@@ -30102,7 +30150,7 @@
     "template": "0604_living_room_white_paneled_wall",
     "path": "all_mockuptemplates_psd/0604_living_room_white_paneled_wall.psd",
     "set": "living_room_white_paneled_wall",
-    "frames": 3,
+    "frames": 1,
     "frame": "white",
     "style": "minimal_light",
     "warmth": "neutral",
@@ -30140,7 +30188,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0605_entryway_golden_wall_window_seat",
@@ -30272,7 +30321,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0608_living_room_cream_sofa",
@@ -32163,7 +32213,7 @@
     "template": "0646_living_room_orange_wall",
     "path": "all_mockuptemplates_psd/0646_living_room_orange_wall.psd",
     "set": "living_room_orange_wall",
-    "frames": 3,
+    "frames": 1,
     "frame": "light_wood",
     "style": "modern",
     "warmth": "warm",
@@ -32179,7 +32229,7 @@
       "bright",
       "contemporary"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -32201,7 +32251,8 @@
         "psd_w": 832,
         "psd_h": 1216
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0647_living_room_retro_green_wall",
@@ -33187,7 +33238,8 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "flagged": true
   },
   {
     "template": "0669_gallery_orange_neon_plants",
@@ -35499,7 +35551,7 @@
     "template": "0721_minimalist_shelf_display",
     "path": "all_mockuptemplates_psd/0721_minimalist_shelf_display.psd",
     "set": "minimalist_shelf_display",
-    "frames": 3,
+    "frames": 1,
     "frame": "light_wood",
     "style": "minimal_light",
     "warmth": "warm",
@@ -38183,7 +38235,7 @@
     "template": "0783_bathroom_terracotta_wall",
     "path": "all_mockuptemplates_psd/0783_bathroom_terracotta_wall.psd",
     "set": "bathroom_terracotta_wall",
-    "frames": 3,
+    "frames": 1,
     "frame": "white",
     "style": "minimal_light",
     "warmth": "warm",
@@ -38199,7 +38251,7 @@
       "minimal decor",
       "window shutters"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -39635,7 +39687,7 @@
     "template": "0816_minimal_shelf_golden_frames",
     "path": "all_mockuptemplates_psd/0816_minimal_shelf_golden_frames.psd",
     "set": "minimal_shelf_golden_frames",
-    "frames": 3,
+    "frames": 1,
     "frame": "golden",
     "style": "minimal_light",
     "warmth": "warm",
@@ -41778,7 +41830,9 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "not_sure": false,
+    "flagged": false
   },
   {
     "template": "0864_living_room_mint_green",
@@ -48337,7 +48391,7 @@
     "template": "1009_bathroom_terracotta_wall",
     "path": "all_mockuptemplates_psd/1009_bathroom_terracotta_wall.psd",
     "set": "bathroom_terracotta_wall",
-    "frames": 3,
+    "frames": 1,
     "frame": "white",
     "style": "minimal_light",
     "warmth": "warm",
@@ -49833,7 +49887,7 @@
     "template": "1043_shelf_golden_frames_minimal",
     "path": "all_mockuptemplates_psd/1043_shelf_golden_frames_minimal.psd",
     "set": "shelf_golden_frames_minimal",
-    "frames": 3,
+    "frames": 1,
     "frame": "golden",
     "style": "minimal_light",
     "warmth": "cool",
@@ -49893,7 +49947,7 @@
       "side light",
       "minimalist decor"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [

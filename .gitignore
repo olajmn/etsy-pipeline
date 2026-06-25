@@ -8,6 +8,10 @@ assets/mockup-templates/all_mockuptemplates_psd/
 # Generated products
 products/
 
+# Test outputs / previews
+pipeline/mockup/previews/
+pipeline/mockup/templates/*.png
+
 # Python
 __pycache__/
 *.pyc

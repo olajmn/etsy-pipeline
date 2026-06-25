@@ -41,6 +41,7 @@ def _load_calibration() -> dict:
 
 # Background color → warmth (used to match prints to room scenes)
 BG_WARMTH = {
+    # legacy names
     "warm_cream":  "warm",
     "blush":       "warm",
     "pale_yellow": "warm",
@@ -51,6 +52,12 @@ BG_WARMTH = {
     "soft_sage":   "neutral",
     "stone":       "neutral",
     "forest":      "neutral",
+    # HSL anchor names
+    "parchment":   "warm",
+    "rose_white":  "warm",
+    "mist":        "cool",
+    "sage_mist":   "neutral",
+    # "lavender" already above
 }
 
 
@@ -146,10 +153,17 @@ def _pick_diverse(pool: list[dict], count: int, exclude_sets: set | None = None)
     return selected
 
 
+def _is_calibrated(entry: dict) -> bool:
+    """Return True only if this template has a calibrated PNG on disk."""
+    slug = entry["template"]
+    return (TEMPLATES_DIR / "mockuptemplates_calibrated" / f"{slug}.png").exists()
+
+
 def _select_single(warmth: str, n: int = 6) -> list[Path]:
     """Pick N templates split ~evenly: matching warmth / contrast / random."""
     all_entries   = _load_all_segments()
-    active_single = [e for e in all_entries if e.get("active") and e.get("frames") == 1]
+    active_single = [e for e in all_entries
+                     if e.get("active") and e.get("frames") == 1 and _is_calibrated(e)]
 
     contrast_map  = {"warm": "cool", "cool": "warm"}
     contrast      = contrast_map.get(warmth)  # None for neutral
@@ -177,21 +191,11 @@ def _select_single(warmth: str, n: int = 6) -> list[Path]:
 def _select_multi(n_frames: int, count: int = 1) -> list[Path]:
     """Pick `count` multi-frame templates with exactly n_frames."""
     all_entries = _load_all_segments()
-    pool        = [e for e in all_entries if e.get("active") and e.get("frames") == n_frames]
+    pool        = [e for e in all_entries
+                   if e.get("active") and e.get("frames") == n_frames and _is_calibrated(e)]
     if not pool:
         return []
     return [TEMPLATES_DIR / e["path"] for e in random.sample(pool, min(count, len(pool)))]
-
-
-# ── PNG + JSON approach (perspective warp) ─────────────────────────────────
-
-def _load_frames(coords_path: Path) -> list[np.ndarray]:
-    data = json.loads(coords_path.read_text())
-    frames = []
-    for f in data["frames"]:
-        pts = np.float32([f["top_left"], f["top_right"], f["bottom_right"], f["bottom_left"]])
-        frames.append(pts)
-    return frames
 
 
 def _inset_quad(pts: np.ndarray, pad: int) -> np.ndarray:
@@ -200,55 +204,6 @@ def _inset_quad(pts: np.ndarray, pad: int) -> np.ndarray:
     norms    = np.linalg.norm(dirs, axis=1, keepdims=True)
     return pts + (dirs / norms) * pad
 
-
-def _warp_print(print_path: Path, dst_pts: np.ndarray, canvas: np.ndarray) -> np.ndarray:
-    img          = np.array(Image.open(print_path).convert("RGB"))
-    img          = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-    canvas_float = canvas.astype(np.float32) / 255.0
-    inner_pts    = _inset_quad(dst_pts, FRAME_PADDING) if FRAME_PADDING > 0 else dst_pts
-    h, w         = img.shape[:2]
-    src_pts      = np.float32([[0, 0], [w, 0], [w, h], [0, h]])
-    M            = cv2.getPerspectiveTransform(src_pts, inner_pts)
-    warped       = cv2.warpPerspective(img, M, (canvas.shape[1], canvas.shape[0]))
-    inner_mask   = np.zeros(canvas.shape[:2], dtype=np.uint8)
-    cv2.fillPoly(inner_mask, [inner_pts.astype(np.int32)], 255)
-    warped_float = warped.astype(np.float32) / 255.0
-    inner_3ch    = inner_mask[:, :, np.newaxis] / 255.0
-    blended      = warped_float * canvas_float
-    result       = canvas_float * (1 - inner_3ch) + blended * inner_3ch
-    return (result * 255).astype(np.uint8)
-
-
-def _generate_png(collection_dir: Path, template_path: Path, mockups_dir: Path) -> list[Path]:
-    template_json = template_path.with_suffix(".json")
-    if not template_path.exists() or not template_json.exists():
-        return []
-    template_name = _slug(template_path)
-    frames        = _load_frames(template_json)
-    layered       = _collect_prints(collection_dir, len(frames))
-    if not layered:
-        return []
-    template = cv2.imread(str(template_path))
-    outputs  = []
-    if len(frames) == 1:
-        for print_path in layered:
-            canvas = template.copy()
-            canvas = _warp_print(print_path, frames[0], canvas)
-            prefix = _cat_name(print_path)
-            name   = f"{prefix}_{template_name}.png" if prefix else f"{template_name}.png"
-            out    = mockups_dir / name
-            cv2.imwrite(str(out), canvas)
-            outputs.append(out)
-    else:
-        picks  = random.sample(layered, min(len(frames), len(layered)))
-        canvas = template.copy()
-        for i, dst_pts in enumerate(frames):
-            if i < len(picks):
-                canvas = _warp_print(picks[i], dst_pts, canvas)
-        out = mockups_dir / f"{template_name}.png"
-        cv2.imwrite(str(out), canvas)
-        outputs.append(out)
-    return outputs
 
 
 # ── PSD approach (smart object, multiply blend) ────────────────────────────
@@ -301,7 +256,7 @@ def _cover_crop(src_w: int, src_h: int, frame_w: float, frame_h: float):
 
 
 def _place_print_quad(bg: np.ndarray, result: np.ndarray, corners: dict,
-                      print_path: Path, white_fill: bool = False) -> None:
+                      print_path: Path, force_clip: bool = False) -> None:
     """Place print into a calibrated quadrilateral using perspective warp."""
     tl, tr, bl, br = corners["tl"], corners["tr"], corners["bl"], corners["br"]
 
@@ -335,17 +290,90 @@ def _place_print_quad(bg: np.ndarray, result: np.ndarray, corners: dict,
 
     mask = np.zeros((bg_h, bg_w), dtype=np.uint8)
     cv2.fillPoly(mask, [dst_pts.astype(np.int32)], 255)
-    mask = cv2.GaussianBlur(mask, (3, 3), 1)  # anti-alias the edge
+    feather = max(int(min(bg_w, bg_h) * 0.0007), 2)   # ~0.07% of output → soft edge
+    mask = cv2.GaussianBlur(mask, (0, 0), sigmaX=feather)
 
-    if white_fill:
-        bg_blend = bg.copy()
-        cv2.fillPoly(bg_blend, [dst_pts.astype(np.int32)], (255, 255, 255))
+    inside_check = mask > 128
+    inside_3ch   = inside_check[:, :, np.newaxis]
+    mask_3       = mask[:, :, np.newaxis] / 255.0
+
+    if force_clip:
+        # 3-layer composite for flagged templates (existing Matisse/text in frame):
+        #   1. Solid white base  →  completely covers existing artwork
+        #   2. Cat art on top    →  placed with perspective warp
+        #   3. Shadow/light map  →  room's luminance from original bg, greyscale only
+        #                           (greyscale avoids Matisse colour tinting;
+        #                            only dark/light info passes through)
+
+        # Layer 1+2: place cat art directly (white implicit base)
+        result[:] = (warped * mask_3 + result * (1 - mask_3)).astype(np.uint8)
+
+        # Layer 3: room shadow/light — only where bg looks like wall.
+        # Pixels with high colour spread (artwork) or very dark (text) get
+        # factor=1.0 so they leave no ghost; neutral wall shadows pass through.
+        bg_luma    = bg.mean(axis=2).astype(np.float32)     # (H, W)
+        bg_std     = bg.std(axis=2).astype(np.float32)      # colour spread per pixel
+        is_wall    = (bg_std < 25) & (bg_luma > 160)        # neutral colour AND not too dark
+        shadow_raw = np.clip(bg_luma / 230.0, 0.72, 1.10)
+        shadow     = np.where(is_wall, shadow_raw, 1.0)[:, :, np.newaxis]
+        shadowed   = np.clip(result.astype(np.float32) * shadow, 0, 255).astype(np.uint8)
+        result[:]  = np.where(inside_3ch, shadowed, result)
+
     else:
-        bg_blend = bg
+        blended   = _multiply_blend(bg, warped)
+        result[:] = (blended * mask_3 + result * (1 - mask_3)).astype(np.uint8)
 
-    blended = _multiply_blend(bg_blend, warped)
-    mask_3  = mask[:, :, np.newaxis] / 255.0
-    result[:] = (blended * mask_3 + result * (1 - mask_3)).astype(np.uint8)
+    # Inner frame shadow: dark gradient at edges, warped with same M so it
+    # follows the frame perspective automatically.
+    sh       = max(int(min(w_src, h_src) * 0.017), 3)
+    xs       = np.arange(w_src, dtype=np.float32)
+    ys       = np.arange(h_src, dtype=np.float32)
+    dist_x   = np.minimum(xs, (w_src - 1) - xs).clip(0, sh)
+    dist_y   = np.minimum(ys, (h_src - 1) - ys).clip(0, sh)
+    dist_2d  = np.minimum(dist_x[np.newaxis, :], dist_y[:, np.newaxis])
+    # Exponential falloff: nearly opaque at edge, quickly fades inward
+    shadow   = 0.30 * np.exp(-dist_2d * 4.0 / sh).astype(np.float32)
+    mult_src = (1.0 - shadow)                                 # 0.15 at edge → 1.0 inward
+    mult_w   = cv2.warpPerspective(mult_src, M, (bg_w, bg_h),
+                                   flags=cv2.INTER_LINEAR, borderValue=1.0)
+    # Blur the warped shadow so it feels diffuse rather than a hard strip
+    blur_px  = max(int(min(bg_w, bg_h) * 0.008), 3)
+    blur_px  = blur_px if blur_px % 2 == 1 else blur_px + 1
+    mult_w   = cv2.GaussianBlur(mult_w, (blur_px, blur_px), 0)
+    result[:] = np.where(
+        inside_3ch,
+        np.clip(result.astype(np.float32) * mult_w[:, :, np.newaxis], 0, 255).astype(np.uint8),
+        result,
+    )
+
+
+
+def _export_clean_png(psd_path: Path, out_path: Path) -> bool:
+    """Render PSD with smart objects hidden → empty frames, real room lighting."""
+    try:
+        from psd_tools import PSDImage
+        psd = PSDImage.open(str(psd_path))
+        for l in psd:
+            if l.kind == "smartobject":
+                l.visible = False
+        psd.composite().convert("RGB").save(str(out_path))
+        return True
+    except Exception as e:
+        print(f"  clean PNG feil ({psd_path.name}): {e}")
+        return False
+
+
+
+def _clean_png_for(slug: str, psd_path: Path) -> Path | None:
+    """Return path to clean PNG (render from PSD if not cached yet)."""
+    clean = TEMPLATES_DIR / "all_mockuptemplates" / f"{slug}_clean.png"
+    if not clean.exists():
+        if not psd_path.exists():
+            return None
+        print(f"  Rendrer ren PNG for {slug} ...")
+        if not _export_clean_png(psd_path, clean):
+            return None
+    return clean
 
 
 def _open_psd_bg(template_path: Path):
@@ -364,16 +392,19 @@ def _generate_psd_single(print_path: Path, template_path: Path, mockups_dir: Pat
     entry    = _get_entry(rel_path)
     slug     = entry["template"] if entry else _slug(template_path)
     cal      = _load_calibration().get(slug, {})
+    flagged  = entry.get("flagged", False) if entry else False
     flat_png = TEMPLATES_DIR / "all_mockuptemplates" / f"{slug}.png"
-    png_path = flat_png if flat_png.exists() else template_path.with_suffix(".png")
+    if flagged:
+        png_path = _clean_png_for(slug, template_path) or (flat_png if flat_png.exists() else None)
+    else:
+        png_path = flat_png if flat_png.exists() else template_path.with_suffix(".png")
     raw_b    = (entry.get("bounds") or [{}])[0] if entry else {}
 
-    if png_path.exists() and ("tl" in cal or raw_b):
+    if png_path and png_path.exists() and ("tl" in cal or raw_b):
         # Fast path: PNG directly, no psd_tools
         OUTPUT_SIZE = 3000
         bg_pil      = Image.open(png_path).convert("RGB")
         orig_w, orig_h = bg_pil.size
-        # Upscale template to OUTPUT_SIZE for a sharp composite
         bg_pil = bg_pil.resize((OUTPUT_SIZE, OUTPUT_SIZE), Image.LANCZOS)
         bg     = np.array(bg_pil)
         png_h, png_w = bg.shape[:2]
@@ -390,8 +421,7 @@ def _generate_psd_single(print_path: Path, template_path: Path, mockups_dir: Pat
                 png_w, png_h,
             )
         result = bg.copy()
-        white_fill = entry.get("flagged", False) if entry else False
-        _place_print_quad(bg, result, corners, print_path, white_fill=white_fill)
+        _place_print_quad(bg, result, corners, print_path)
         prefix = _cat_name(print_path)
         name   = f"{prefix}_{slug}.png" if prefix else f"{slug}.png"
         out    = mockups_dir / name
@@ -404,9 +434,10 @@ def _generate_psd_single(print_path: Path, template_path: Path, mockups_dir: Pat
     bg, smart_layers = _open_psd_bg(template_path)
     if not smart_layers:
         return []
-    result = bg.copy()
+    result     = bg.copy()
+    force_clip = entry.get("flagged", False) if entry else False
     if "tl" in cal:
-        _place_print_quad(bg, result, cal, print_path)
+        _place_print_quad(bg, result, cal, print_path, force_clip=force_clip)
     else:
         _place_print(bg, result, smart_layers[0], print_path, cal=cal)
     prefix = _cat_name(print_path)
@@ -422,14 +453,19 @@ def _generate_psd_multi(collection_dir: Path, template_path: Path, mockups_dir: 
     slug       = _slug(template_path)
     cal        = _load_calibration().get(slug, {})
     cal_frames = cal.get("frames", [])
+    entry      = _get_entry(str(template_path.relative_to(TEMPLATES_DIR)))
+    flagged    = entry.get("flagged", False) if entry else False
     flat_png   = TEMPLATES_DIR / "all_mockuptemplates" / f"{slug}.png"
+    if flagged:
+        use_png = _clean_png_for(slug, template_path) or (flat_png if flat_png.exists() else None)
+    else:
+        use_png = flat_png if flat_png.exists() else None
 
-    if cal_frames and all(f and "tl" in f for f in cal_frames) and flat_png.exists():
-        # Fast path: calibrated corners + flat PNG (same as single-frame)
-        entry  = _get_entry(str(template_path.relative_to(TEMPLATES_DIR)))
+    if cal_frames and all(f and "tl" in f for f in cal_frames) and use_png and use_png.exists():
+        # Fast path: calibrated corners + PNG
         raw_b  = (entry.get("bounds") or [{}])[0] if entry else {}
         OUTPUT_SIZE = 3000
-        bg_pil = Image.open(flat_png).convert("RGB")
+        bg_pil = Image.open(use_png).convert("RGB")
         orig_w, orig_h = bg_pil.size
         bg_pil = bg_pil.resize((OUTPUT_SIZE, OUTPUT_SIZE), Image.LANCZOS)
         bg     = np.array(bg_pil)
@@ -440,7 +476,6 @@ def _generate_psd_multi(collection_dir: Path, template_path: Path, mockups_dir: 
             return []
         picks  = random.sample(pool, min(len(cal_frames), len(pool)))
         result = bg.copy()
-        white_fill = entry.get("flagged", False) if entry else False
         for i, frame_cal in enumerate(cal_frames):
             if i < len(picks):
                 corners = _scale_corners(
@@ -448,7 +483,7 @@ def _generate_psd_multi(collection_dir: Path, template_path: Path, mockups_dir: 
                                   "psd_h": raw_b.get("psd_h", orig_h)},
                     png_w, png_h,
                 )
-                _place_print_quad(bg, result, corners, picks[i], white_fill=white_fill)
+                _place_print_quad(bg, result, corners, picks[i])
         name = f"{slug}{suffix}.png"
         out  = mockups_dir / name
         Image.fromarray(result).save(str(out))
