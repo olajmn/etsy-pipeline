@@ -220,86 +220,51 @@ WAALS_CMYK = {
     "weller":      (  0,   0,   0,  97),
 }
 
-# ── Color group selections from Waals ─────────────────────────────────────────
-# Variation applied per group (±hue°, ±sat%, ±light%)
+# ── Color pools — dynamic from full Waals palette ────────────────────────────
+# Variation applied at sampling time (±hue°, ±sat%, ±light%)
 _CAT_DELTA = (8,  8, 6)
-_BG_DELTA  = (8,  5, 5)   # lav sat-delta så muted-farger ikke drifter for levende
 _EYE_DELTA = (12, 8, 7)
+_BG_DELTA  = (8,  3, 4)   # Lav sat-delta; bakgrunner er allerede muted
 
-# Dark cats — rows 8–10, full hue wheel
-DARK_CAT_ANCHORS = {k: WAALS[k] for k in [
-    "anfinsen", "brown", "chadwick", "davidsson", "ehrlich",
-    "furchgott", "gajdusek", "kapitsa", "stanley", "tiselius",
-    "alferov", "baltimore", "crutzen", "dickinson", "ernst",
-    "frisch", "goldstein", "khorana", "mayer", "schrieffer", "tsjerenkov",
-    "arrhenius", "becquerel", "chamberlain", "deisenhofer", "eijkman",
-    "frank", "granit", "klitzing", "mossbauer", "schull", "thomson",
-    "weller",
-]}
+# Fargeunivers 02 (Forskningsrådet): behold H og L, sett S=25% for muted bakgrunner
+_BG_S = 25
 
-# Light cats — rows 3–5, full hue wheel
-LIGHT_CAT_ANCHORS = {k: WAALS[k] for k in [
-    "adrian", "bosch", "curie", "dirac", "eigen", "flory",
-    "glashow", "kastler", "sabatier", "todd",
-    "duve", "elion", "gyorgy", "klug", "summer", "wieschaus",
-    "calvin", "dalen", "enders", "finsen", "giaver", "kohler", "werner",
-]}
 
-# ── Bakgrunnsgrupper ─────────────────────────────────────────────────────────
-# Alle muted (S 0–25%). Delt i to verdener for bevisst paring:
-#   WARM_BG_ANCHORS → katt_1 (tonal, lys, varm)
-#   DARK_BG_ANCHORS → katt_2 (noir, mørk, kjølig)
+def _waals_filter(min_l: int = 0, max_l: int = 100,
+                  min_s: int = 0, max_s: int = 100,
+                  exclude_h: list = None) -> dict:
+    """Filter Waals by HSL ranges. exclude_h: list of (lo, hi) hue ranges to skip."""
+    result = {}
+    for name, (h, s, l) in WAALS.items():
+        if not (min_l <= l <= max_l and min_s <= s <= max_s):
+            continue
+        if exclude_h and any(lo <= h <= hi for lo, hi in exclude_h):
+            continue
+        result[name] = (h, s, l)
+    return result
 
-WARM_BG_ANCHORS = {
-    # Én nøytral base
-    "warm_white":    ( 32,  18,  94),
-    # Tintede varme — gir den to-tonede bakgrunnen synlig variasjon
-    "warm_linen":    ( 35,  20,  88),
-    "sand":          ( 40,  22,  86),
-    "warm_stone":    ( 32,  14,  78),
-    "blush":         (  5,  18,  84),
-    "dusty_rose":    (355,  16,  79),
-    "dusty_peach":   ( 18,  20,  82),
-    "cool_white":    (220,  12,  94),
-    "cool_linen":    (210,  14,  88),
-}
 
-DARK_BG_ANCHORS = {
-    # L=30–48%: mørkt nok til noir-stemning, lyst nok til at svart katt synes
-    "navy":          (218,  35,  32),
-    "charcoal":      (  0,   0,  28),
-    "deep_slate":    (212,  20,  38),
-    "dark_sage":     (142,  22,  32),
-    "dark_plum":     (282,  22,  34),
-    "dark_forest":   (148,  28,  30),
-    "warm_shadow":   ( 28,  16,  30),
-    "cool_shadow":   (218,  16,  35),
-    "deep_burgundy": (345,  25,  32),
-    "dark_teal":     (186,  26,  32),
-}
+# Cat pools — full Waals-metning (katten har ekte, levende farge)
+TONAL_CAT_POOL = _waals_filter(min_l=56, max_l=88, min_s=40)  # lys katt, synlig mot muted bg
+NOIR_CAT_POOL  = _waals_filter(max_l=32,                      # mørk katt
+                                exclude_h=[(35, 105)])         # ingen gul/oliven
 
-# Samlet for funksjoner som ikke er par-spesifikke
-MUTED_BG_ANCHORS = {**WARM_BG_ANCHORS, **DARK_BG_ANCHORS}
+# Eye pools
+TONAL_EYE_POOL = _waals_filter(min_l=65, max_l=82, min_s=70)  # levende øyne, ikke for lys
+NOIR_EYE_POOL  = _waals_filter(min_l=30, max_l=80, min_s=60)  # synlig mot mørk katt
 
-# Eye colors — rows 4–5, high saturation, mid lightness (for noir cats)
-EYE_ANCHORS = {k: WAALS[k] for k in [
-    "duve", "elion", "gyorgy", "klug", "raman", "summer",
-    "calvin", "enders", "finsen", "giaver", "kohler", "reichstein",
-]}
+# Background pools — S dempes til 25% ved sampling (Fargeunivers 02)
+TONAL_BG_POOL  = _waals_filter(min_l=78)                    # lys bakgrunn
+NOIR_BG_POOL   = _waals_filter(min_l=26, max_l=45)          # mørk bakgrunn
 
-# Tonal eye colors — rows 1–2, high saturation AND medium-high lightness (L=65–81%)
-# Metningen vises som klar, levende farge (ikke mørk mud) mot lyse katter.
-TONAL_EYE_ANCHORS = {k: WAALS[k] for k in [
-    "cajal",      # H= 42°  S=100% L=75% — amber/oransje
-    "eccles",     # H= 67°  S= 82% L=70% — gul-grønn
-    "feynman",    # H=100°  S= 89% L=66% — grønn
-    "fermi",      # H=104°  S= 95% L=78% — lys grønn
-    "gabor",      # H=144°  S= 98% L=79% — teal-grønn
-    "katz",       # H=189°  S= 97% L=77% — cyan
-    "raman",      # H=238°  S=100% L=81% — blå
-    "summer",     # H=278°  S=100% L=78% — lilla
-    "reichstein", # H=238°  S=100% L=75% — blå
-]}
+# Aliases for eldre kode
+DARK_CAT_ANCHORS  = NOIR_CAT_POOL
+LIGHT_CAT_ANCHORS = TONAL_CAT_POOL
+EYE_ANCHORS       = {**TONAL_EYE_POOL, **NOIR_EYE_POOL}
+TONAL_EYE_ANCHORS = TONAL_EYE_POOL
+WARM_BG_ANCHORS   = TONAL_BG_POOL
+DARK_BG_ANCHORS   = NOIR_BG_POOL
+MUTED_BG_ANCHORS  = {**TONAL_BG_POOL, **NOIR_BG_POOL}
 
 
 def _sample_hsl(hue: float, sat: float, light: float, delta: tuple) -> tuple:
@@ -311,40 +276,48 @@ def _sample_hsl(hue: float, sat: float, light: float, delta: tuple) -> tuple:
     return (int(r * 255), int(g * 255), int(b * 255))
 
 
-def _sample_anchor(anchors: dict, delta: tuple) -> tuple[str, tuple]:
-    """Pick a random anchor and sample one RGB near its HSL center."""
-    name = random.choice(list(anchors.keys()))
-    h, s, l = anchors[name]
+def _sample_from(pool: dict, delta: tuple) -> tuple[str, tuple]:
+    """Pick a random entry from pool and sample near its HSL center."""
+    name = random.choice(list(pool.keys()))
+    h, s, l = pool[name]
     return name, _sample_hsl(h, s, l, delta)
 
 
+def _sample_bg(pool: dict) -> tuple[str, tuple]:
+    """Fargeunivers 02: behold H og L fra Waals, sett S=25%.
+    Grå farger (S=0 i WAALS) beholder S=0 — ingen kunstig rød-tint."""
+    name = random.choice(list(pool.keys()))
+    h, s, l = pool[name]
+    target_s = _BG_S if s > 0 else 0
+    return name, _sample_hsl(h, target_s, l, _BG_DELTA)
+
+
+def _sample_anchor(anchors: dict, delta: tuple) -> tuple[str, tuple]:
+    """Beholdt for bakover-kompatibilitet. Bruk _sample_from() for ny kode."""
+    return _sample_from(anchors, delta)
+
+
 def _pick_colors() -> tuple:
-    all_cats = {**DARK_CAT_ANCHORS, **LIGHT_CAT_ANCHORS}
-    cat_name, cat_rgb = _sample_anchor(all_cats,         _CAT_DELTA)
-    bg_name,  bg_rgb  = _sample_anchor(MUTED_BG_ANCHORS, _BG_DELTA)
-    eye_name, eye_rgb = _sample_anchor(EYE_ANCHORS,       _EYE_DELTA)
+    """Generic pick — tilfeldig fra hele poolen."""
+    all_cats = {**TONAL_CAT_POOL, **NOIR_CAT_POOL}
+    all_eyes = {**TONAL_EYE_POOL, **NOIR_EYE_POOL}
+    cat_name, cat_rgb = _sample_from(all_cats, _CAT_DELTA)
+    eye_name, eye_rgb = _sample_from(all_eyes, _EYE_DELTA)
+    bg_name,  bg_rgb  = _sample_bg({**TONAL_BG_POOL, **NOIR_BG_POOL})
     return cat_rgb, cat_name, bg_rgb, bg_name, eye_rgb, eye_name
 
 
 def _pick_tonal_colors() -> tuple:
-    """Lys katt på varm, lys bakgrunn — stille, tonal verden.
-    Krever L>55% på katten — kontrasten mot noir skal komme fra lys vs mørk.
-    Bruker TONAL_EYE_ANCHORS: høy S + medium L → øynene ser levende ut, ikke mørke.
-    """
-    tonal_cats = {k: v for k, v in LIGHT_CAT_ANCHORS.items() if v[2] > 55}
-    cat_name, cat_rgb = _sample_anchor(tonal_cats,          _CAT_DELTA)
-    eye_name, eye_rgb = _sample_anchor(TONAL_EYE_ANCHORS,   _EYE_DELTA)
-    bg_name,  bg_rgb  = _sample_anchor(WARM_BG_ANCHORS,     _BG_DELTA)
+    """Lys katt + lys bakgrunn. S=25% på bakgrunn (Fargeunivers 02)."""
+    cat_name, cat_rgb = _sample_from(TONAL_CAT_POOL, _CAT_DELTA)
+    eye_name, eye_rgb = _sample_from(TONAL_EYE_POOL, _EYE_DELTA)
+    bg_name,  bg_rgb  = _sample_bg(TONAL_BG_POOL)
     return cat_rgb, cat_name, bg_rgb, bg_name, eye_rgb, eye_name
 
 
 def _pick_noir_colors() -> tuple:
-    """Mørk katt på mørk, kjølig bakgrunn — dramatisk noir-verden.
-    Ekskluderer H=35–105° (gul/oliven-familien ser muddrete ut på lave L-verdier).
-    """
-    noir_cats = {k: v for k, v in DARK_CAT_ANCHORS.items()
-                 if not (35 <= v[0] <= 105)}
-    cat_name, cat_rgb = _sample_anchor(noir_cats,        _CAT_DELTA)
-    bg_name,  bg_rgb  = _sample_anchor(DARK_BG_ANCHORS,  _BG_DELTA)
-    eye_name, eye_rgb = _sample_anchor(EYE_ANCHORS,       _EYE_DELTA)
+    """Mørk katt + mørk bakgrunn. S=25% på bakgrunn (Fargeunivers 02)."""
+    cat_name, cat_rgb = _sample_from(NOIR_CAT_POOL, _CAT_DELTA)
+    eye_name, eye_rgb = _sample_from(NOIR_EYE_POOL, _EYE_DELTA)
+    bg_name,  bg_rgb  = _sample_bg(NOIR_BG_POOL)
     return cat_rgb, cat_name, bg_rgb, bg_name, eye_rgb, eye_name

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Mockup Calibrator</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:-apple-system,sans-serif; background:#111; color:#eee;
+       display:flex; height:100vh; overflow:hidden; }
+
+#sidebar { width:210px; min-width:210px; background:#1c1c1c;
+  display:flex; flex-direction:column; overflow:hidden; }
+#sidebar-header { padding:12px 12px 8px; border-bottom:1px solid #2a2a2a; }
+#sidebar-header h1 { font-size:12px; font-weight:700; color:#fff; margin-bottom:3px; }
+#progress { font-size:10px; color:#666; }
+#search { width:100%; margin-top:6px; padding:4px 6px; background:#2a2a2a;
+  border:1px solid #3a3a3a; border-radius:4px; color:#eee; font-size:10px; outline:none; }
+#search::placeholder { color:#555; }
+#tpl-list { flex:1; overflow-y:auto; padding:4px; }
+.tpl-item { padding:4px 8px; border-radius:4px; cursor:pointer;
+  font-size:10px; color:#999; margin-bottom:1px;
+  display:flex; align-items:center; gap:4px; }
+.tpl-item:hover { background:#252525; color:#ccc; }
+.tpl-item.active { background:#2a1f0a; color:#f90; }
+.tpl-item.deactivated { opacity:0.4; }
+.tpl-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+.tpl-status { flex-shrink:0; font-size:9px; }
+
+#main { flex:1; display:flex; flex-direction:column;
+  gap:8px; padding:10px 14px 14px; overflow:hidden; }
+
+#hint { font-size:11px; color:#777; min-height:16px; }
+#hint.placing { color:#f80; }
+
+#zoom-area { flex:1; overflow:hidden; position:relative; border-radius:4px; }
+#canvas-wrap { position:absolute; transform-origin:0 0; display:inline-block; cursor:crosshair;
+  transition: transform 0.12s ease-out; }
+#template-img { display:block; user-select:none; pointer-events:none; }
+
+#ref-overlay { position:absolute; border:1px dashed rgba(255,255,255,0.18);
+  pointer-events:none; display:none; }
+#ovl-canvas  { position:absolute; top:0; left:0; pointer-events:none; }
+
+:root { --fc: rgba(255,136,0,0.9); --fc-faint: rgba(255,136,0,0.07); }
+.ch { position:absolute; width:40px; height:40px;
+  transform:translate(-50%,-50%); cursor:crosshair; display:none;
+  border-radius:50%; background:var(--fc-faint); }
+.ch::before,.ch::after { content:""; position:absolute; background:var(--fc); }
+.ch::before { top:50%; left:0; right:0; height:0.5px; margin-top:-0.25px; }
+.ch::after  { left:50%; top:0; bottom:0; width:0.5px; margin-left:-0.25px; }
+
+#corner-dot { position:absolute; width:10px; height:10px;
+  border:1px solid #f55; border-radius:50%;
+  transform:translate(-50%,-50%); display:none; pointer-events:none; }
+#corner-dot::before,#corner-dot::after { content:""; position:absolute; background:#f55; }
+#corner-dot::before { top:50%; left:-5px; right:-5px; height:1px; margin-top:-0.5px; }
+#corner-dot::after  { left:50%; top:-5px; bottom:-5px; width:1px; margin-left:-0.5px; }
+
+#live-rect { position:absolute; border:1px dashed rgba(255,80,80,0.65);
+  pointer-events:none; display:none; }
+
+#controls { display:flex; gap:8px; justify-content:center; }
+button { padding:7px 16px; border:none; border-radius:6px;
+  font-size:13px; font-weight:600; cursor:pointer; }
+#btn-save  { background:#f80; color:#000; }
+#btn-save:hover  { background:#fa0; }
+#btn-skip  { background:#252525; color:#aaa; }
+#btn-skip:hover  { background:#333; }
+#btn-reset { background:#252525; color:#777; }
+#btn-reset:hover { background:#333; }
+#btn-flag          { background:#252525; color:#aaa; }
+#btn-flag:hover    { background:#333; }
+#btn-flag.flagged  { background:#f80; color:#000; }
+#btn-flag.flagged:hover { background:#fa0; }
+#btn-notsure       { background:#252525; color:#aaa; }
+#btn-notsure:hover { background:#333; }
+#btn-notsure.active { background:#55a; color:#fff; }
+#btn-notsure.active:hover { background:#66b; }
+#btn-fg            { background:#252525; color:#aaa; }
+#btn-fg:hover      { background:#333; }
+#btn-fg.active     { background:#2a6; color:#fff; }
+#btn-fg.active:hover { background:#3b7; }
+
+#info    { font-size:12px; color:#666; }
+#offsets { font-size:10px; color:#444; font-family:monospace; }
+#frame-indicator { font-size:13px; color:#fa0; font-weight:600; min-height:20px; }
+#frame-counter { display:flex; align-items:center; gap:6px; font-size:12px; color:#666; }
+#frame-counter button { padding:2px 9px; font-size:14px; font-weight:700;
+  background:#252525; color:#aaa; border:none; border-radius:4px; cursor:pointer; }
+#frame-counter button:hover { background:#3a3a3a; color:#fff; }
+#frame-count-val { font-size:13px; color:#ccc; font-weight:600; min-width:14px; text-align:center; }
+</style>
+</head>
+<body>
+<div id="sidebar">
+  <div id="sidebar-header">
+    <h1>Mockup Calibrator</h1>
+    <div id="progress">Laster...</div>
+    <input id="search" type="text" placeholder="Søk..." autocomplete="off">
+  </div>
+  <div id="tpl-list"></div>
+</div>
+
+<div id="main">
+  <div id="hint">Laster...</div>
+  <div id="zoom-area">
+    <div id="canvas-wrap">
+      <img id="template-img" src="" alt="">
+      <div id="ref-overlay"></div>
+      <canvas id="ovl-canvas"></canvas>
+    </div>
+  </div>
+  <div id="controls">
+    <button id="btn-reset">Reset</button>
+    <button id="btn-undo">Angre</button>
+    <button id="btn-skip">Skip</button>
+    <button id="btn-save">Lagre</button>
+    <button id="btn-next">Neste</button>
+    <button id="btn-gen">Generer mockup</button>
+    <button id="btn-flag" title="Tving hvit bakgrunn inni rammen (for maler med Matisse/tekst-lag)">⚑ Flagg</button>
+    <button id="btn-notsure" title="Marker som usikker">🤔</button>
+    <button id="btn-fg" title="Mal har forgrunns-elementer foran rammen (lampe, plante, osv)">🪴 FG</button>
+    <button id="btn-deactivate">Deaktiver</button>
+  </div>
+  <div id="frame-indicator"></div>
+  <div id="frame-counter">
+    <span>Rammer:</span>
+    <button id="btn-frames-dec">−</button>
+    <span id="frame-count-val">1</span>
+    <button id="btn-frames-inc">+</button>
+  </div>
+  <div id="info">Laster...</div>
+  <div id="offsets"></div>
+</div>
+
+<script>
+const FRAME_COLORS = ["#ff8800", "#4488ff", "#44cc66"];
+const FRAME_FAINTS = ["rgba(255,136,0,0.07)", "rgba(68,136,255,0.07)", "rgba(68,204,102,0.07)"];
+
+let templates = [], idx = 0;
+let nFrames = 1;
+let allBounds = [];
+let allFrameCorners = [];
+let allHandleEls = [];
+let activeDrag = null;
+
+const img       = document.getElementById("template-img");
+const refOvl    = document.getElementById("ref-overlay");
+const ovlCanvas = document.getElementById("ovl-canvas");
+const wrap      = document.getElementById("canvas-wrap");
+const zoomArea  = document.getElementById("zoom-area");
+
+let zoom = 1, panX = 0, panY = 0, panDrag = null;
+
+function applyTransform() {
+  wrap.style.transform = `translate(${panX}px,${panY}px) scale(${zoom})`;
+}
+
+function resetZoom() {
+  const za = zoomArea.getBoundingClientRect();
+  const iw = img.naturalWidth || img.offsetWidth;
+  const ih = img.naturalHeight || img.offsetHeight;
+  zoom = Math.min(za.width / iw, za.height / ih, 1);
+  panX = (za.width  - iw * zoom) / 2;
+  panY = (za.height - ih * zoom) / 2;
+  applyTransform();
+}
+
+zoomArea.addEventListener("wheel", e => {
+  e.preventDefault();
+  if (e.ctrlKey) {
+    // Pinch-to-zoom or Ctrl+scroll → zoom
+    const rect   = zoomArea.getBoundingClientRect();
+    const mx     = e.clientX - rect.left;
+    const my     = e.clientY - rect.top;
+    const factor = e.deltaY < 0 ? 1.03 : 1 / 1.03;
+    const newZ   = Math.max(0.3, Math.min(12, zoom * factor));
+    panX = mx - (mx - panX) * (newZ / zoom);
+    panY = my - (my - panY) * (newZ / zoom);
+    zoom = newZ;
+  } else {
+    // Two-finger scroll → pan (no transition lag)
+    wrap.style.transition = "none";
+    panX -= e.deltaX;
+    panY -= e.deltaY;
+  }
+  applyTransform();
+}, {passive: false});
+
+zoomArea.addEventListener("mousedown", e => {
+  if (e.target === img || e.target === ovlCanvas || e.target === wrap || e.target === refOvl) {
+    panDrag = {startX: e.clientX, startY: e.clientY, startPanX: panX, startPanY: panY};
+    e.preventDefault();
+  }
+});
+
+zoomArea.addEventListener("dblclick", () => resetZoom());
+const info      = document.getElementById("info");
+const offsets   = document.getElementById("offsets");
+const tplList   = document.getElementById("tpl-list");
+const progress  = document.getElementById("progress");
+const hint      = document.getElementById("hint");
+
+function psdToWrap(x, y) {
+  const b = allBounds[0];
+  if (!b) return {x: 0, y: 0};
+  return { x: x*(img.clientWidth /b.psd_w),
+           y: y*(img.clientHeight/b.psd_h) };
+}
+
+function ensureHandles(n) {
+  allHandleEls.forEach(({el}) => el.remove());
+  allHandleEls = [];
+  for (let fi = 0; fi < n; fi++) {
+    const color = FRAME_COLORS[fi] || FRAME_COLORS[0];
+    const faint = FRAME_FAINTS[fi] || FRAME_FAINTS[0];
+    ["tl","tr","bl","br"].forEach(k => {
+      const el = document.createElement("div");
+      el.className = "ch";
+      el.style.setProperty("--fc", color);
+      el.style.setProperty("--fc-faint", faint);
+      el.style.display = "none";
+      el.addEventListener("mousedown", e => {
+        e.stopPropagation(); e.preventDefault();
+        wrap.style.transition = "none";
+        const b = allBounds[fi] || allBounds[0];
+        activeDrag = {fi, key: k,
+                      startX: e.clientX, startY: e.clientY,
+                      startC: {...allFrameCorners[fi][k]},
+                      imgW: img.clientWidth, imgH: img.clientHeight,
+                      psd_w: b.psd_w, psd_h: b.psd_h};
+      });
+      wrap.appendChild(el);
+      allHandleEls.push({fi, key: k, el});
+    });
+  }
+}
+
+
+async function init() {
+  const r = await fetch("/api/templates");
+  templates = await r.json();
+  renderList();
+  if (templates.length) load(0);
+}
+
+function renderList(scroll=true) {
+  const cal = templates.filter(t => t.calibrated && !t.dirty).length;
+  progress.textContent = `${cal} / ${templates.length} kalibrert`;
+  const q = (document.getElementById("search")?.value || "").toLowerCase();
+  tplList.innerHTML = templates.map((t,i) => {
+    if (q && !t.slug.toLowerCase().includes(q) && !t.set.toLowerCase().includes(q)) return "";
+    const deact = t.active === false ? "deactivated" : "";
+    let icon;
+    if (t.active === false) {
+      icon = `<span class="tpl-status" style="color:#c33">✕</span>`;
+    } else {
+      const parts = [];
+      if (t.flagged)   parts.push(`<span style="color:#f80">⚑</span>`);
+      if (t.not_sure)  parts.push(`<span>🤔</span>`);
+      if (t.has_fg)    parts.push(`<span style="color:#2a6">🪴</span>`);
+      if (t.dirty)            parts.push(`<span style="color:#cc0">✓</span>`);
+      else if (t.calibrated)  parts.push(`<span style="color:#4a4">✓</span>`);
+      else if (t.frames > 1 && t.frames_done > 0) parts.push(`<span style="color:#f80">${t.frames_done}/${t.frames}</span>`);
+      else if (t.skipped)     parts.push(`<span style="color:#555">✓</span>`);
+      icon = `<span class="tpl-status">${parts.join("")}</span>`;
+    }
+    const badge = t.frames > 1 ? ` <span style="color:#555;font-size:8px">[${t.frames}]</span>` : "";
+    return `<div class="tpl-item ${deact} ${i===idx?"active":""}" onclick="load(${i})">
+      <span class="tpl-name">${t.slug.split("_")[0]}. ${t.set}${badge}</span>${icon}</div>`;
+  }).join("");
+  if (scroll) tplList.querySelector(".active")?.scrollIntoView({block:"nearest"});
+}
+
+async function load(i) {
+  idx = i;
+  nFrames = templates[i].frames || 1;
+  allBounds = [];
+  allFrameCorners = [];
+  ensureHandles(nFrames);
+
+  const t = templates[i];
+  clearCanvas();
+  allHandleEls.forEach(({el}) => el.style.display = "none");
+  refOvl.style.display = "none";
+  document.getElementById("frame-indicator").textContent =
+    nFrames > 1 ? `${nFrames} rammer` : "";
+  document.getElementById("frame-count-val").textContent = nFrames;
+  img.src = `/api/template/${t.slug}/image?_=${Date.now()}`;
+  info.textContent = `${i+1} / ${templates.length} — ${t.set}`;
+  offsets.textContent = "";
+  hint.textContent = "Laster..."; hint.className = "";
+
+  const frameParams = nFrames > 1
+    ? Array.from({length: nFrames}, (_, fi) => `?frame_idx=${fi}`)
+    : [""];
+  const responses = await Promise.all(
+    frameParams.map(p => fetch(`/api/template/${t.slug}/bounds${p}`).then(r => r.json()))
+  );
+  responses.forEach((d, fi) => {
+    if (!d.error) {
+      allBounds[fi] = d;
+      const c = d.corners;
+      allFrameCorners[fi] = {
+        tl:{x:c.tl[0],y:c.tl[1]}, tr:{x:c.tr[0],y:c.tr[1]},
+        bl:{x:c.bl[0],y:c.bl[1]}, br:{x:c.br[0],y:c.br[1]},
+      };
+    }
+  });
+
+  const show = () => requestAnimationFrame(() => {
+    resetZoom();
+    drawQuad();
+    hint.textContent = nFrames > 1
+      ? `${nFrames} rammer — dra hjørner, deretter Lagre`
+      : "Dra hjørner  |  Scroll for zoom  |  Dra bakgrunn for pan  |  Dobbelklikk for reset";
+  });
+  if (img.complete && img.naturalWidth) show();
+  else img.onload = show;
+  updateFlagBtn();
+  updateNotSureBtn();
+  updateFgBtn();
+  renderList();
+}
+
+function updateFlagBtn() {
+  const flagged = !!(templates[idx] && templates[idx].flagged);
+  const btn = document.getElementById("btn-flag");
+  btn.textContent = flagged ? "⚑ Flagget" : "⚑ Flagg";
+  btn.classList.toggle("flagged", flagged);
+}
+
+function updateNotSureBtn() {
+  const ns = !!(templates[idx] && templates[idx].not_sure);
+  document.getElementById("btn-notsure").classList.toggle("active", ns);
+}
+
+function updateFgBtn() {
+  const fg = !!(templates[idx] && templates[idx].has_fg);
+  document.getElementById("btn-fg").classList.toggle("active", fg);
+}
+
+function clearCanvas() {
+  const ctx = ovlCanvas.getContext("2d");
+  ctx.clearRect(0, 0, ovlCanvas.width, ovlCanvas.height);
+}
+
+
+// ── corner dragging ────────────────────────────────────────────────────────
+document.addEventListener("mousemove", e => {
+  if (panDrag) {
+    panX = panDrag.startPanX + (e.clientX - panDrag.startX);
+    panY = panDrag.startPanY + (e.clientY - panDrag.startY);
+    applyTransform();
+  }
+  if (!activeDrag) return;
+  const {fi, key, startX, startY, startC, imgW, imgH, psd_w, psd_h} = activeDrag;
+  const speed = e.shiftKey ? 0.1 : 1.0;
+  const dx = (e.clientX-startX)*(psd_w/imgW)/zoom*speed;
+  const dy = (e.clientY-startY)*(psd_h/imgH)/zoom*speed;
+  allFrameCorners[fi][key] = {x:Math.round(startC.x+dx), y:Math.round(startC.y+dy)};
+  hint.textContent = e.shiftKey
+    ? "Finmodus (Shift) — 1 skjerm-px = 0.1 PSD-px"
+    : "Dra hjørner for justering  |  Hold Shift for finmodus";
+  drawQuad();
+});
+document.addEventListener("mouseup", () => {
+  if (activeDrag && templates[idx]) { templates[idx].dirty = true; renderList(false); }
+  activeDrag = null;
+  panDrag = null;
+  wrap.style.transition = "transform 0.12s ease-out";
+});
+
+// ── canvas drawing ─────────────────────────────────────────────────────────
+function drawQuad() {
+  if (!img.clientWidth || !img.clientHeight) return;
+  ovlCanvas.width  = img.clientWidth;
+  ovlCanvas.height = img.clientHeight;
+  const ctx = ovlCanvas.getContext("2d");
+  ctx.clearRect(0, 0, ovlCanvas.width, ovlCanvas.height);
+
+  allHandleEls.forEach(({fi, key, el}) => {
+    const fc = allFrameCorners[fi];
+    if (!fc) { el.style.display = "none"; return; }
+    const {x,y} = psdToWrap(fc[key].x, fc[key].y);
+    el.style.left = x+"px"; el.style.top = y+"px";
+    el.style.display = "block";
+  });
+
+  const c0 = allFrameCorners[0];
+  if (c0) offsets.textContent =
+    `tl(${Math.round(c0.tl.x)},${Math.round(c0.tl.y)})  ` +
+    `tr(${Math.round(c0.tr.x)},${Math.round(c0.tr.y)})  ` +
+    `bl(${Math.round(c0.bl.x)},${Math.round(c0.bl.y)})  ` +
+    `br(${Math.round(c0.br.x)},${Math.round(c0.br.y)})`;
+}
+
+// ── buttons ────────────────────────────────────────────────────────────────
+async function saveAll() {
+  const t = templates[idx];
+  try {
+    for (let fi = 0; fi < nFrames; fi++) {
+      const fc = allFrameCorners[fi];
+      if (!fc) continue;
+      const body = {
+        tl:[fc.tl.x,fc.tl.y], tr:[fc.tr.x,fc.tr.y],
+        bl:[fc.bl.x,fc.bl.y], br:[fc.br.x,fc.br.y],
+      };
+      if (nFrames > 1) { body.frame_idx = fi; body.frame_count = nFrames; }
+      const resp = await fetch(`/api/template/${t.slug}/calibrate`, {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(body),
+      });
+      const j = await resp.json();
+      if (!j.ok) { hint.textContent = `⚠ Feil ramme ${fi+1}: ` + (j.error || resp.status); return; }
+    }
+  } catch(e) {
+    hint.textContent = "⚠ Nettverksfeil: " + e.message; return;
+  }
+  templates[idx].calibrated = true;
+  templates[idx].dirty      = false;
+  renderList();
+  hint.textContent = nFrames > 1 ? `Alle ${nFrames} rammer lagret ✓` : "Lagret ✓";
+}
+
+document.getElementById("btn-save").addEventListener("click", saveAll);
+document.getElementById("btn-next").addEventListener("click", () => {
+  if (idx+1 < templates.length) load(idx+1);
+  else info.textContent = "Siste template!";
+});
+document.getElementById("btn-undo").addEventListener("click", async () => {
+  await load(idx);
+  hint.textContent = "Tilbakestilt til siste lagring";
+});
+document.getElementById("btn-skip").addEventListener("click", async () => {
+  if (templates[idx]) {
+    templates[idx].skipped = true;
+    await fetch(`/api/template/${templates[idx].slug}/skip`, {method:"POST"});
+    renderList(false);
+  }
+  if (idx+1 < templates.length) load(idx+1);
+});
+document.getElementById("btn-flag").addEventListener("click", async () => {
+  const t = templates[idx];
+  if (!t) return;
+  const r = await fetch(`/api/template/${t.slug}/flag`, {method:"POST"});
+  const j = await r.json();
+  templates[idx].flagged = j.flagged;
+  hint.textContent = j.flagged
+    ? "⚑ Flagget — vil alltid bruke veggens farge inni rammen"
+    : "Flagg fjernet";
+  updateFlagBtn();
+  renderList(false);
+});
+document.getElementById("btn-notsure").addEventListener("click", async () => {
+  const t = templates[idx];
+  if (!t) return;
+  const r = await fetch(`/api/template/${t.slug}/not_sure`, {method:"POST"});
+  const j = await r.json();
+  templates[idx].not_sure = j.not_sure;
+  hint.textContent = j.not_sure ? "🤔 Markert som usikker" : "Usikker-markering fjernet";
+  updateNotSureBtn();
+  renderList(false);
+});
+document.getElementById("btn-fg").addEventListener("click", async () => {
+  const t = templates[idx];
+  if (!t) return;
+  const r = await fetch(`/api/template/${t.slug}/fg`, {method:"POST"});
+  const j = await r.json();
+  templates[idx].has_fg = j.has_fg;
+  hint.textContent = j.has_fg ? "🪴 Markert — forgrunn-elementer foran rammen" : "FG-markering fjernet";
+  updateFgBtn();
+  renderList(false);
+});
+async function changeFrameCount(delta) {
+  const t = templates[idx];
+  if (!t) return;
+  const newCount = Math.max(1, (t.frames || 1) + delta);
+  if (newCount === (t.frames || 1)) return;
+  const r = await fetch(`/api/template/${t.slug}/set_frames`, {
+    method: "POST", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({frames: newCount})
+  });
+  const j = await r.json();
+  if (j.ok) {
+    templates[idx].frames = newCount;
+    hint.textContent = `Antall rammer satt til ${newCount}`;
+    load(idx);
+  }
+}
+document.getElementById("btn-frames-dec").addEventListener("click", () => changeFrameCount(-1));
+document.getElementById("btn-frames-inc").addEventListener("click", () => changeFrameCount(+1));
+
+document.getElementById("btn-deactivate").addEventListener("click", async () => {
+  if (!confirm(`Deaktiver "${templates[idx].set}"?`)) return;
+  await fetch(`/api/template/${templates[idx].slug}/deactivate`, {method:"POST"});
+  templates[idx].active = false;
+  hint.textContent = "Deaktivert";
+  if (idx+1 < templates.length) load(idx+1);
+});
+document.getElementById("btn-gen").addEventListener("click", async () => {
+  const t = templates[idx];
+  if (!t) return;
+  const btn = document.getElementById("btn-gen");
+  btn.textContent = "Genererer..."; btn.disabled = true;
+  const r = await fetch(`/api/template/${t.slug}/generate`, {method:"POST"});
+  const j = await r.json();
+  btn.textContent = "Generer mockup"; btn.disabled = false;
+  if (j.error) { hint.textContent = "⚠ " + j.error; alert(j.error); }
+  else hint.textContent = "Åpnet: " + j.file.split("/").pop();
+});
+document.getElementById("btn-reset").addEventListener("click", () => {
+  allBounds.forEach((b, fi) => {
+    if (b) allFrameCorners[fi] = {
+      tl:{x:b.left,y:b.top},   tr:{x:b.right,y:b.top},
+      bl:{x:b.left,y:b.bottom}, br:{x:b.right,y:b.bottom},
+    };
+  });
+  drawQuad();
+  hint.textContent = "Reset til PSD-bounds";
+});
+
+window.addEventListener("resize", () => { drawQuad(); updateRefOverlay(); });
+document.getElementById("search").addEventListener("input", () => renderList(false));
+init();
+</script>
+</body>
+</html>

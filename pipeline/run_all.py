@@ -18,7 +18,7 @@ load_dotenv(override=True)
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from pipeline.generate.color_generator import generate_collection
+from pipeline.generate.image_builder import generate_collection
 from pipeline.describe.describe import describe_pair, collect_used_names
 from pipeline.publish.publish import publish_pair, _refresh_token
 from pipeline.generate.color_card import generate_color_card

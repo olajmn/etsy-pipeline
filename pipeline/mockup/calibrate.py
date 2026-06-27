@@ -329,7 +329,7 @@ def api_generate(slug):
         if not print_path:
             return jsonify({"error": "no test print found"}), 404
 
-        out_dir = Path("pipeline/mockup/previews")
+        out_dir = Path("products/previews")
         out_dir.mkdir(exist_ok=True)
 
         calib     = json.loads((Path("pipeline/mockup/calibration.json")).read_text())

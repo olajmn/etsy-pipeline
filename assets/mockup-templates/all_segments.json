@@ -41,7 +41,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0002_office_wooden_desk_plants",
@@ -85,7 +90,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0003_living_room_reading_nook",
@@ -129,7 +140,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0004_kitchen_window_counter",
@@ -173,7 +189,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0005_bedroom_yellow_wall_vanity",
@@ -217,7 +238,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "retro",
+      "modern"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0006_minimalist_entryway_window_nook",
@@ -261,7 +287,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0007_living_room_beige_sofa",
@@ -305,7 +336,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0008_living_room_cream_sofa",
@@ -349,7 +385,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0009_minimal_living_room_window",
@@ -393,7 +435,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0010_office_desk_dark_wall",
@@ -437,7 +484,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "industrial"
+    ],
+    "bg_tone": "dark"
   },
   {
     "template": "0011_minimalist_gallery_entryway",
@@ -481,7 +533,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0012_minimal_room_black_frame_wood_bench",
@@ -525,7 +582,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0013_minimal_room_white_frame_window",
@@ -569,7 +631,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0014_minimal_studio_window_light",
@@ -613,7 +681,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0015_minimal_white_room",
@@ -656,7 +729,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0016_minimal_room_black_frame",
@@ -701,7 +779,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": false
+    "flagged": false,
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0017_minimal_room_light_wood_shelf",
@@ -745,7 +828,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0018_windowsill_minimal_light",
@@ -789,7 +877,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0019_minimal_studio_white_frame",
@@ -831,7 +924,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0020_hallway_minimal_white",
@@ -875,7 +973,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0021_minimal_white_room_single_frame",
@@ -919,7 +1022,11 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0022_minimal_room_natural_light",
@@ -963,7 +1070,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0023_minimal_room_light_wood_frame",
@@ -1007,7 +1119,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0024_minimal_entryway_window_light",
@@ -1051,7 +1168,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0025_minimal_room_light_wood_frame",
@@ -1095,7 +1217,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0026_industrial_loft_concrete_floor",
@@ -1139,7 +1266,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "industrial",
+      "modern",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0027_living_room_green_sofa",
@@ -1307,7 +1440,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0029_office_desk_dark_wall",
@@ -1436,7 +1575,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0031_living_room_green_sofa",
@@ -1500,7 +1644,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0032_living_room_armchair_gallery",
@@ -1584,7 +1734,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0033_living_room_beige_minimal",
@@ -1668,7 +1823,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0034_living_room_mid_century_modern",
@@ -1732,7 +1892,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0035_office_white_desk_window",
@@ -1816,7 +1982,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0036_office_desk_white_minimal",
@@ -1900,7 +2071,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0037_living_room_green_sofa",
@@ -1984,7 +2160,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0038_office_dark_wall_desk",
@@ -2093,7 +2274,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0040_living_room_gray_sofa_window",
@@ -2137,7 +2323,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0041_dining_room_light_wood_table",
@@ -2305,7 +2497,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0043_bedroom_light_wood_frames",
@@ -2369,7 +2566,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0044_entryway_minimal_console",
@@ -2433,7 +2636,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "japandi",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0045_kitchen_white_minimalist",
@@ -2731,7 +2940,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0049_entryway_wooden_console",
@@ -2775,7 +2989,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0050_hallway_white_frames_bench",
@@ -2963,7 +3182,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0052_bedroom_light_wood_minimal",
@@ -3071,7 +3296,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0054_modern_green_workspace",
@@ -3115,7 +3345,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "japandi"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0055_kitchen_taupe_counter",
@@ -3159,7 +3395,11 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0056_kitchen_minimal_counter",
@@ -3203,7 +3443,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0057_dining_room_wooden_table",
@@ -3247,7 +3492,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0058_living_room_window_light",
@@ -3291,7 +3541,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0059_bedroom_peachy_minimalist",
@@ -3335,7 +3590,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi",
+      "cozy"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0060_minimal_entryway_console",
@@ -3379,7 +3640,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0061_living_room_sage_green_sofa",
@@ -3423,7 +3690,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0062_living_room_neutral_sofa",
@@ -3467,7 +3739,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "cozy",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0063_bedroom_purple_wall_window",
@@ -3511,7 +3789,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0064_bedroom_purple_wall_minimal",
@@ -3599,7 +3882,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "industrial",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0066_minimal_room_white_frame",
@@ -3643,7 +3931,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0067_minimal_light_room_dried_plants",
@@ -3687,7 +3980,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0068_minimal_studio_concrete_room",
@@ -3729,7 +4027,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0069_minimal_hallway_entryway",
@@ -3773,7 +4077,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0070_bedroom_blue_wall_minimal",
@@ -3861,7 +4170,11 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0072_minimal_living_room_window",
@@ -3905,7 +4218,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0073_bright_minimal_room_brick_wall",
@@ -3947,7 +4265,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0074_minimalist_gallery_space",
@@ -4035,7 +4358,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0076_living_room_green_sofa",
@@ -4243,7 +4571,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0078_dining_room_light_wood_gallery",
@@ -4431,7 +4764,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0080_hallway_console_window",
@@ -4515,7 +4853,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0081_office_desk_gallery_wall",
@@ -4957,7 +5300,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0086_bedroom_white_minimal",
@@ -5022,7 +5371,12 @@
         "psd_h": 1024
       }
     ],
-    "not_sure": false
+    "not_sure": false,
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0087_living_room_minimal_light_wood",
@@ -5066,7 +5420,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0088_living_room_christmas_armchair",
@@ -5154,7 +5513,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "classic",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0090_living_room_pink_shelves",
@@ -5198,7 +5562,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "eclectic"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0091_living_room_colorful_shelving",
@@ -5414,7 +5783,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "boho",
+      "maximalist",
+      "eclectic"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0095_dining_room_white_frames_plants",
@@ -5790,7 +6165,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "boho",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0099_reading_nook_sage_wall",
@@ -5812,7 +6193,7 @@
       "shelving",
       "bright"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -6082,7 +6463,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0102_living_room_reading_nook",
@@ -6378,7 +6765,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0106_office_desk_window",
@@ -6506,7 +6898,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0108_bedroom_neutral_mirrors",
@@ -6571,7 +6968,12 @@
         "psd_h": 1024
       }
     ],
-    "not_sure": true
+    "not_sure": true,
+    "aesthetic": [
+      "scandinavian",
+      "classic"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0109_entryway_blue_wall",
@@ -7075,7 +7477,11 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0115_bedroom_kids_wood_wall",
@@ -7831,7 +8237,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0129_bedroom_teal_wall_window",
@@ -7983,7 +8394,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi",
+      "cozy"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0132_kitchen_orange_wall",
@@ -8047,7 +8464,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "boho",
+      "modern"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0133_kitchen_orange_accent_wall",
@@ -8603,7 +9025,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0142_minimal_white_room_frame_mockup",
@@ -8691,7 +9118,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0144_minimal_room_window_light",
@@ -10758,7 +11190,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "maximalist",
+      "boho"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0191_nursery_coral_wall_shelf",
@@ -11328,7 +11765,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "boho",
+      "cozy"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0204_workspace_mint_green_desk",
@@ -11372,7 +11814,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0205_shelf_green_wall_plants",
@@ -11702,7 +12149,7 @@
       "workspace",
       "modern decor"
     ],
-    "active": true,
+    "active": false,
     "bounds": [
       {
         "tl": [
@@ -12424,7 +12871,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0228_living_room_christmas_display",
@@ -13018,7 +13470,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "japandi",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0242_bedroom_wooden_walls_window",
@@ -14624,7 +15081,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0289_bedroom_light_wood_dresser",
@@ -14932,7 +15394,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0296_kitchen_dining_window_light",
@@ -14977,7 +15444,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "rustic"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0297_dining_room_wooden_table",
@@ -15021,7 +15493,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0298_dining_room_terracotta_natural_light",
@@ -15505,7 +15983,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0311_sunroom_garden_view",
@@ -16935,7 +17418,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "cozy",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0348_bedroom_window_bench",
@@ -17111,7 +17600,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0353_bedroom_window_morning_light",
@@ -17528,7 +18022,13 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "boho",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0364_living_room_beige_sofa",
@@ -17593,7 +18093,13 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0365_living_room_beige_sofa",
@@ -17658,7 +18164,13 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "boho"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0366_living_room_neutral_sofa",
@@ -17723,7 +18235,13 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "boho",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0367_living_room_minimal_sofa",
@@ -17788,7 +18306,13 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "boho"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0368_living_room_minimalist_sofa",
@@ -17853,7 +18377,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0369_living_room_modern_lounge",
@@ -17918,7 +18447,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0370_living_room_neutral_sofa",
@@ -18047,7 +18581,13 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "boho"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0372_living_room_concrete_wall",
@@ -18177,7 +18717,13 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "boho",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0374_living_room_neutral_sofa",
@@ -18242,7 +18788,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0375_living_room_white_sofa",
@@ -18307,7 +18858,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0376_bedroom_daybed_white_wall",
@@ -18373,7 +18929,13 @@
       }
     ],
     "flagged": true,
-    "skipped": true
+    "skipped": true,
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0377_living_room_white_sofa",
@@ -18503,7 +19065,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "classic"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0379_kitchen_white_marble_counter",
@@ -18568,7 +19135,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0380_kitchen_black_white_marble",
@@ -18633,7 +19205,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0381_kitchen_black_white_marble",
@@ -18698,7 +19275,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern",
+      "retro"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0382_kitchen_white_countertop",
@@ -18763,7 +19345,11 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0383_office_minimal_workspace",
@@ -18892,7 +19478,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "japandi",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0385_office_minimal_workspace",
@@ -18957,7 +19548,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0386_kitchen_white_counter_black_frames",
@@ -19022,7 +19618,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0387_kitchen_white_counter",
@@ -19087,7 +19688,11 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0388_office_desk_beige_wall",
@@ -19152,7 +19757,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0389_office_desk_warm_minimalist",
@@ -19217,7 +19827,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0390_office_desk_minimal",
@@ -19282,7 +19897,11 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0391_office_desk_beige_wall",
@@ -19347,7 +19966,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0392_kitchen_white_minimalist",
@@ -19412,7 +20036,11 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0393_kitchen_white_counter",
@@ -19477,7 +20105,11 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0394_kitchen_white_modern",
@@ -19671,7 +20303,12 @@
       }
     ],
     "flagged": true,
-    "not_sure": false
+    "not_sure": false,
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0397_living_room_cream_sofa",
@@ -19736,7 +20373,13 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern",
+      "scandinavian",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0398_living_room_cream_sofa",
@@ -25639,7 +26282,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern",
+      "industrial"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0503_cafe_window_seating",
@@ -26492,7 +27140,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0521_kitchen_marble_counter",
@@ -29351,7 +30004,13 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "modern",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0586_living_room_minimalist_seating",
@@ -29396,7 +30055,11 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0587_entryway_gray_paneled_wall",
@@ -30189,7 +30852,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0605_entryway_golden_wall_window_seat",
@@ -30322,7 +30990,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0608_living_room_cream_sofa",
@@ -33239,7 +33912,12 @@
         "psd_h": 1024
       }
     ],
-    "flagged": true
+    "flagged": true,
+    "aesthetic": [
+      "modern",
+      "maximalist"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0669_gallery_orange_neon_plants",
@@ -34427,7 +35105,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "japandi",
+      "modern"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0696_living_room_wood_paneling",
@@ -35589,7 +36272,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "scandinavian",
+      "japandi"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0722_living_room_white_shelf_display",
@@ -40297,7 +40985,13 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "rustic",
+      "scandinavian",
+      "cozy"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0830_kitchen_rustic_wooden_frame",
@@ -41133,7 +41827,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "industrial"
+    ],
+    "bg_tone": "dark"
   },
   {
     "template": "0849_minimal_gallery_entrance",
@@ -41353,7 +42052,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0854_minimal_hallway_frame_leaning",
@@ -41832,7 +42536,12 @@
       }
     ],
     "not_sure": false,
-    "flagged": false
+    "flagged": false,
+    "aesthetic": [
+      "scandinavian",
+      "modern"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "0864_living_room_mint_green",
@@ -43063,7 +43772,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "boho",
+      "cozy"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "0892_kids_room_lime_green_wall",
@@ -49925,7 +50639,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "scandinavian"
+    ],
+    "bg_tone": "light"
   },
   {
     "template": "1044_bedroom_nightstand_minimal",
@@ -50013,7 +50732,12 @@
         "psd_w": 1024,
         "psd_h": 1024
       }
-    ]
+    ],
+    "aesthetic": [
+      "modern",
+      "japandi"
+    ],
+    "bg_tone": "colorful"
   },
   {
     "template": "1046_living_room_orange_wall",

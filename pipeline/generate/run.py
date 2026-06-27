@@ -13,15 +13,13 @@ Modes:
   6. Pattern      — scattered cats on large canvas
 """
 from pathlib import Path
-from color_generator import (
-    generate_colored, generate_multi, generate_scatter,
-    generate_layered, generate_layered_pair, generate_collection,
+from image_builder import (
+    generate_pair, generate_set, generate_collection,
     next_generation_dir,
-    OUTPUT_DIR, MULTI_OUTPUT_DIR, SCATTER_OUTPUT_DIR,
-    LAYERED_OUTPUT_DIR, LAYERED_PAIR_OUT_DIR, CANVAS_SIZES,
+    OUTPUT_DIR,
 )
 
-PRODUCTS_DIR = Path("../../products")
+PRODUCTS_DIR = Path("products")
 
 
 def ask(question: str, options: list[str]) -> str:
@@ -41,6 +39,7 @@ def main():
     print("╚══════════════════════════╝\n")
 
     mode = ask("What do you want to generate?", [
+        "Set (4 prints + 6 mockups, flat)        ← production",
         "Collection (3 pairs — warm/cool/soft)  ← production",
         "Layered pair (poster + portrait)        ← production",
         "Single cat (experiment)",
@@ -58,7 +57,13 @@ def main():
         n = input("How many? (default 1): ").strip()
         count = int(n) if n.isdigit() else 1
 
-    if "Collection" in mode:
+    if "Set" in mode:
+        print(f"\nGenerating {count} set(s) → products/\n")
+        for i in range(count):
+            print(f"[{i+1}/{count}]")
+            generate_set(out_dir=PRODUCTS_DIR)
+
+    elif "Collection" in mode:
         print(f"\nGenerating {count} collection(s) → products/\n")
         for i in range(count):
             print(f"[{i+1}/{count}]")
@@ -68,7 +73,7 @@ def main():
         print(f"\nGenerating {count} pair(s) → products/\n")
         for i in range(count):
             print(f"[{i+1}/{count}]")
-            generate_layered_pair(out_dir=next_generation_dir(LAYERED_PAIR_OUT_DIR))
+            generate_pair(out_dir=OUTPUT_DIR)
 
     elif "Single" in mode:
         out = next_generation_dir(OUTPUT_DIR)
