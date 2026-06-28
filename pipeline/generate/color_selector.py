@@ -31,12 +31,19 @@ def hue_dist(h1: float, h2: float) -> float:
 
 
 def temperature(hue: float) -> str:
-    """Classify a hue as warm, cool, or neutral (Itten cold-warm contrast)."""
-    if hue < 60 or hue > 300:
+    """
+    Classify a hue as warm or cool (Itten cold-warm contrast).
+
+    Itten's division: warm side peaks at red-orange (~H 15°),
+    cool side peaks at blue-green (~H 170°). The boundary is at
+    yellow-green (~H 65°) and red-violet (~H 315°).
+
+    No neutral zone — every hue leans one way or the other.
+    This ensures bg filtering never silently skips valid colors.
+    """
+    if hue < 65 or hue > 315:
         return "warm"
-    elif 100 < hue < 260:
-        return "cool"
-    return "neutral"   # yellow-green and red-violet transition zones
+    return "cool"
 
 
 def _l_contrast_ok(cat_l: float, bg_l: float, min_delta: float = 15.0) -> bool:
@@ -113,28 +120,43 @@ def _pick_bg(pool: dict, cat_l: float, cat_hue: float,
 
 # ── Step 4+5: Eyes with hue accent and S boost ───────────────────────────────
 
+def _eye_delta(cat_hue: float, eye_hue: float) -> float:
+    """Shortest angular distance between cat hue and eye hue (0–180°)."""
+    return abs((eye_hue - cat_hue + 180) % 360 - 180)
+
+
 def _pick_eye(pool: dict, cat_hue: float, max_tries: int = 30) -> tuple[str, tuple]:
     """
-    Pick eyes that:
-      - Are 60–180° from cat hue (avoids analogous muddle, maximises accent)
-      - Have S boosted ~15% to compensate for size-based chroma loss (Gurney)
+    Pick eyes using a three-pass priority cascade:
 
-    Falls back to any eye from the pool if no accent found.
+    Pass 1 — near-complementary (ΔH 150–180°): strongest visual accent.
+              The complementary color maximises simultaneous contrast (Albers).
+
+    Pass 2 — any accent (ΔH 60–180°): still clearly distinct from cat hue.
+
+    Pass 3 — fallback: any eye from the pool.
+
+    In all passes: CMYK S cap applied before the +15% size boost.
     """
+    def _sample(name):
+        h, s, l = WAALS[name]
+        boosted_s = min(100.0, _cmyk_safe_s(h, s) * 1.15)
+        return name, _sample_hsl(h, boosted_s, l, _EYE_DELTA)
+
+    # Pass 1: near-complementary accent (ΔH 150–180°)
     for _ in range(max_tries):
         name = random.choice(list(pool.keys()))
-        h, s, l = WAALS[name]
-        if _eye_is_accent(cat_hue, h):
-            capped_s  = _cmyk_safe_s(h, s)
-            boosted_s = min(100.0, capped_s * 1.15)
-            return name, _sample_hsl(h, boosted_s, l, _EYE_DELTA)
+        if 150 <= _eye_delta(cat_hue, WAALS[name][0]) <= 180:
+            return _sample(name)
 
-    # Fallback: any eye — still cap + boost S
-    name = random.choice(list(pool.keys()))
-    h, s, l = WAALS[name]
-    capped_s  = _cmyk_safe_s(h, s)
-    boosted_s = min(100.0, capped_s * 1.15)
-    return name, _sample_hsl(h, boosted_s, l, _EYE_DELTA)
+    # Pass 2: any accent (ΔH 60–180°)
+    for _ in range(max_tries):
+        name = random.choice(list(pool.keys()))
+        if _eye_is_accent(cat_hue, WAALS[name][0]):
+            return _sample(name)
+
+    # Pass 3: fallback
+    return _sample(random.choice(list(pool.keys())))
 
 
 # ── Core pick functions ───────────────────────────────────────────────────────

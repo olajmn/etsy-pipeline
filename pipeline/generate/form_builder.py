@@ -12,7 +12,7 @@ from pathlib import Path
 from PIL import Image
 
 
-SILHOUETTES_DIR = Path("assets/silhouettes")
+SILHOUETTES_DIR = Path("assets/silhouettes-individual")
 CAT_TEMPLATE    = Path("assets/precedents/portrait.png")
 
 CANVAS_SIZES = {
