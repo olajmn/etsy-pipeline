@@ -217,8 +217,9 @@ def api_calibrate(slug):
 
     if fully_done:
         src = TEMPLATES_DIR / "all_mockuptemplates" / f"{slug}.png"
-        dst = TEMPLATES_DIR / "mockuptemplates_calibrated" / f"{slug}.png"
+        dst = TEMPLATES_DIR / "mockuptemplates_calibrated" / "general" / f"{slug}.png"
         if src.exists():
+            dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, dst)
 
     return jsonify({"ok": True, "fully_done": fully_done})
@@ -292,6 +293,14 @@ def api_deactivate(slug):
         if e["template"] == slug:
             e["active"] = False
     all_file.write_text(json.dumps(entries, indent=2, ensure_ascii=False))
+
+    # Move calibrated PNG to deactivated/ subfolder
+    calibrated_dir  = TEMPLATES_DIR / "mockuptemplates_calibrated"
+    deactivated_dir = calibrated_dir / "deactivated"
+    deactivated_dir.mkdir(parents=True, exist_ok=True)
+    for png in calibrated_dir.rglob(f"{slug}.png"):
+        if "deactivated" not in png.parts:
+            shutil.move(str(png), str(deactivated_dir / png.name))
 
     deleted = 0
     for mockup_file in PRODUCTS_DIR.rglob(f"*{slug}*.png"):

@@ -16,10 +16,10 @@ SILHOUETTES_DIR = Path("assets/silhouettes-individual")
 CAT_TEMPLATE    = Path("assets/precedents/portrait.png")
 
 CANVAS_SIZES = {
-    "plakat":   (1500, 2000),
-    "kvadrat":  (1080, 1080),
-    "portrett": (1080, 1350),
-    "story":    (1080, 1920),
+    "plakat":   (3508, 4961),
+    "kvadrat":  (3508, 3508),
+    "portrett": (3508, 4961),
+    "story":    (2160, 3840),
 }
 
 CAT_SCALE          = 0.55

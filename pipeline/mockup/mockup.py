@@ -154,9 +154,13 @@ def _pick_diverse(pool: list[dict], count: int, exclude_sets: set | None = None)
 
 
 def _is_calibrated(entry: dict) -> bool:
-    """Return True only if this template has a calibrated PNG on disk."""
+    """Return True if a calibrated PNG exists anywhere except the deactivated/ subfolder."""
     slug = entry["template"]
-    return (TEMPLATES_DIR / "mockuptemplates_calibrated" / f"{slug}.png").exists()
+    calibrated_dir = TEMPLATES_DIR / "mockuptemplates_calibrated"
+    return any(
+        p for p in calibrated_dir.rglob(f"{slug}.png")
+        if "deactivated" not in p.parts
+    )
 
 
 def _select_single(warmth: str, n: int = 6) -> list[Path]:
