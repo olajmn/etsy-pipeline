@@ -1,112 +1,88 @@
 # etsy-pipeline
 
-An automated pipeline that generates original cat-themed art, writes Etsy-ready
-listing copy with Claude, renders it into realistic room mockups, and publishes
-it to Etsy — all from a single command (or a Telegram bot).
+A pipeline that generates cat-themed poster art, writes Etsy listing copy via
+the Claude API, composites the art into photographed room scenes, and
+publishes the listing through the Etsy API.
+
+## Pipeline
 
 ```
 run_all.py ──► generate ──► describe ──► mockup ──► publish
               (artwork)   (AI copy)   (room scene)  (Etsy API)
 ```
 
-## Features
+| Stage | Module | Description |
+|---|---|---|
+| Generate | `pipeline/generate/` | Composes poster art from a fixed 143-color palette (`palette.py`), pairing colors by color-theory rules (`color_selector.py`) rather than arbitrary values. Each product is a tonal/noir pair — one light+warm cat, one dark+cool cat. |
+| Describe | `pipeline/describe/` | Calls the Claude API to generate a title, tags, and description per product. |
+| Mockup | `pipeline/mockup/` | Warps the generated art into calibrated perspective frames over photographed room templates (`assets/mockup-templates/`). |
+| Publish | `pipeline/publish/` | Creates the listing as an Etsy draft via the Etsy API (OAuth2). |
 
-- **Generative art** — procedurally composed cat posters using a curated
-  143-color palette (`palette.py`), driven by color theory (complementary,
-  analogous, triadic pairings) rather than random hex codes.
-- **AI-written listings** — Claude generates unique titles, tags, and
-  descriptions for every product.
-- **Room mockups** — artwork is warped into real photographed room scenes via
-  calibrated perspective frames, so listings show the poster in context.
-- **Etsy publishing** — listings are created as drafts directly via the Etsy
-  API (OAuth2).
-- **Telegram control** — trigger generation and publishing from your phone.
+Each collection is written to `products/collection-N/pair-X/`, with the
+generated images, `description.json`, and (after publishing)
+`published.json`.
 
 ## Project structure
 
 ```
-etsy-bot/
+etsy-pipeline/
 ├── config.py                  — pricing, Etsy listing defaults
 ├── pipeline/
-│   ├── run_all.py             — main entry point: generate + describe + mockup + publish
-│   ├── telegram_bot.py        — Telegram bot for controlling the pipeline
-│   ├── generate/               — artwork generation (palette, color theory, image builder)
-│   ├── describe/                — Claude-written titles/descriptions
-│   ├── mockup/                  — places artwork into room-scene templates
-│   └── publish/                  — Etsy OAuth2 + publishing
+│   ├── run_all.py             — entry point: generate + describe + mockup + publish
+│   ├── telegram_bot.py        — Telegram interface for the same commands
+│   ├── generate/               — palette, color theory, image composition
+│   ├── describe/                — Claude-generated listing copy
+│   ├── mockup/                  — room-scene compositing + calibration
+│   └── publish/                  — Etsy OAuth2 + listing creation
 ├── assets/
-│   └── mockup-templates/       — room-scene templates + calibration data
-└── products/                   — generated collections (gitignored)
+│   └── mockup-templates/       — room-scene templates + calibration data (not tracked in git)
+└── products/                   — generated output (not tracked in git)
 ```
 
 ## Setup
 
-1. **Install dependencies**
+```bash
+pip install -r requirements.txt
+cp .env.template .env
+```
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+`.env` needs:
 
-2. **Configure environment variables**
+- `ANTHROPIC_API_KEY` — Claude API, used by `describe/`
+- `ETSY_CLIENT_ID`, `ETSY_SHARED_SECRET`, `ETSY_SHOP_ID`, `ETSY_USER_ID` — Etsy app credentials
+- `ETSY_ACCESS_TOKEN` — populated by the OAuth step below, not set manually
+- `DEFAULT_PRICE_USD` — listing price
+- `TELEGRAM_BOT_TOKEN`, `TELEGRAM_OWNER_ID` — only needed for `telegram_bot.py`
 
-   ```bash
-   cp .env.template .env
-   ```
+One-time Etsy authorization:
 
-   Fill in:
+```bash
+python3 pipeline/publish/oauth.py
+```
 
-   | Variable | Purpose |
-   |---|---|
-   | `ANTHROPIC_API_KEY` | Claude API access, for listing copy |
-   | `OPENAI_API_KEY` | (if used by the pipeline) |
-   | `ETSY_CLIENT_ID`, `ETSY_SHARED_SECRET` | Etsy app credentials |
-   | `ETSY_SHOP_ID`, `ETSY_USER_ID` | Your Etsy shop |
-   | `ETSY_ACCESS_TOKEN` | Filled in automatically by the OAuth step below |
-   | `DEFAULT_PRICE_USD` | Default listing price |
-
-3. **Authorize with Etsy (one-time)**
-
-   ```bash
-   python3 pipeline/publish/oauth.py
-   ```
-
-   Opens a browser to authorize the app and saves the access/refresh tokens
-   into `.env`.
+Opens a browser to authorize the app, writes the access/refresh tokens to
+`.env`.
 
 ## Usage
 
-Always run from the project root.
+Run from the project root.
 
 ```bash
 python3 pipeline/run_all.py            # generate + describe 1 collection
 python3 pipeline/run_all.py 3          # generate + describe 3 collections
-python3 pipeline/run_all.py publish    # publish all unpublished pairs to Etsy
+python3 pipeline/run_all.py publish    # publish all unpublished pairs
 ```
 
-### Telegram bot
+or via Telegram:
 
 ```bash
 python3 pipeline/telegram_bot.py
 ```
 
-Requires `TELEGRAM_BOT_TOKEN` and `TELEGRAM_OWNER_ID` in `.env`. Commands:
-
 | Command | Action |
 |---|---|
-| `/generate` | Generate + describe 1 collection |
-| `/generate 3` | Generate N collections |
+| `/generate [n]` | Generate + describe n collections (default 1) |
 | `/publish` | Publish all unpublished pairs |
 | `/status` | Show published/total counts |
 
-## Color system
-
-Colors are drawn from the **Waals palette** — 143 named colors (after Nobel
-laureates) defined in `pipeline/generate/palette.py`. Pairings follow a
-tonal/noir system (one light+warm cat, one dark+cool cat) and are selected
-using color theory rules in `color_selector.py`, rather than arbitrary hex
-values.
-
-## Status
-
-Personal project, actively developed. See `CLAUDE.md` for detailed pipeline
-notes and progress log.
+See `CLAUDE.md` for implementation notes and current progress.
