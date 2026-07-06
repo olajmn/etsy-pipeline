@@ -80,7 +80,7 @@ etsy-bot/
 
 ---
 
-## What's Done ✅
+## What's Done
 
 - [x] Core pipeline: generate → describe → mockup → publish
 - [x] Waals palette with 143 colors
@@ -95,7 +95,7 @@ etsy-bot/
 
 ---
 
-## What's Left / Next Steps 🔜
+## What's Left / Next Steps
 
 *(Update this list as things get done or priorities change)*
 

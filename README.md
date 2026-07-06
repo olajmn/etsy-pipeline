@@ -1,4 +1,4 @@
-# etsy-pipeline 🐱
+# etsy-pipeline
 
 An automated pipeline that generates original cat-themed art, writes Etsy-ready
 listing copy with Claude, renders it into realistic room mockups, and publishes
