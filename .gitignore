@@ -1,9 +1,12 @@
 # Secret keys — ALDRI på GitHub
 .env
 
-# Large asset folders
+# Large asset folders — business/product data, not code. Kept locally only.
 assets/mockup-templates/all_mockuptemplates/
 assets/mockup-templates/all_mockuptemplates_psd/
+assets/mockup-templates/mockuptemplates_calibrated/
+assets/mockup-templates/all_segments.json
+assets/cats i like/
 
 # Generated products
 products/
