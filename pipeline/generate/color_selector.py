@@ -47,8 +47,29 @@ def temperature(hue: float) -> str:
 
 
 def _l_contrast_ok(cat_l: float, bg_l: float, min_delta: float = 15.0) -> bool:
-    """ΔL ≥ 15 ensures the cat is clearly visible against its background."""
+    """ΔL ≥ min_delta ensures the cat is clearly visible against its background."""
     return abs(cat_l - bg_l) >= min_delta
+
+
+def _adaptive_min_delta(cat_l: float, mode: str) -> float:
+    """
+    Adaptive contrast threshold based on cat lightness and mode.
+
+    Noir (dark cats): very dark cats need a much lighter background to be
+    readable — the eye struggles to distinguish dark-on-dark even at ΔL=10.
+
+    Tonal (light cats): all tonal backgrounds are light (L=78–99), so the
+    maximum achievable ΔL is ~10. We raise the bar slightly for the lightest
+    cats, but can't go higher without exhausting the pool.
+    """
+    if mode == "noir":
+        if cat_l < 15:   return 22   # near-black cat → needs lighter bg
+        elif cat_l < 25: return 14   # dark cat → moderate separation
+        else:            return 10   # less dark → original threshold
+    else:  # tonal
+        if cat_l > 80:   return 10   # very light cat → push for darkest tonal bgs
+        elif cat_l > 70: return 9    # light cat → slightly stricter than default
+        else:            return 8    # medium-light → original threshold
 
 
 def _eye_is_accent(cat_hue: float, eye_hue: float) -> bool:
@@ -84,24 +105,46 @@ def _sample_cat(pool: dict, delta: tuple) -> tuple[str, tuple]:
 
 # ── Step 2+3: Background with temperature contrast and L-contrast ─────────────
 
+def _sample_bg_weighted(pool: dict) -> tuple[str, tuple]:
+    """
+    Weighted background sampler for tonal pool.
+    Darker tonal bgs (L=78-85) get 3x weight, mid (L=86-92) get 2x,
+    near-white (L=93-100) get 1x — balances a pool that skews very light.
+    """
+    names = list(pool.keys())
+    weights = []
+    for name in names:
+        l = WAALS.get(name, (0, 0, 100))[2]
+        if l <= 85:   weights.append(3)
+        elif l <= 92: weights.append(2)
+        else:         weights.append(1)
+    chosen = random.choices(names, weights=weights, k=1)[0]
+    h, s, l = pool[chosen]
+    from palette import _BG_S, _BG_DELTA, _sample_hsl
+    target_s = _BG_S if s > 0 else 0
+    return chosen, _sample_hsl(h, target_s, l, _BG_DELTA)
+
+
 def _pick_bg(pool: dict, cat_l: float, cat_hue: float,
-             max_tries: int = 30, min_delta: float = 15.0) -> tuple[str, tuple]:
+             max_tries: int = 30, mode: str = "noir") -> tuple[str, tuple]:
     """
     Pick a background that:
       - Prefers the opposite temperature to the cat (warm cat → cool bg)
-      - Has ΔL ≥ min_delta with the cat for visibility
+      - Has ΔL ≥ adaptive threshold with the cat for visibility
 
-    min_delta=8 for tonal (chroma contrast covers some lightness overlap),
-    min_delta=15 for noir (dark cat needs a clearly lighter bg to read).
+    The threshold adapts to cat lightness: very dark or very light cats need
+    more separation from the background to stay readable.
 
     Falls back gracefully: first drops temperature preference,
     then drops L-contrast, if the pool is too narrow.
     """
+    min_delta      = _adaptive_min_delta(cat_l, mode)
     preferred_temp = "cool" if temperature(cat_hue) == "warm" else "warm"
+    sampler        = _sample_bg_weighted if mode == "tonal" else _sample_bg
 
     # Pass 1: temperature match + L-contrast
     for _ in range(max_tries):
-        name, rgb = _sample_bg(pool)
+        name, rgb = sampler(pool)
         bg_l = WAALS.get(name, (0, 0, 0))[2]
         bg_h = WAALS.get(name, (0, 0, 0))[0]
         if _l_contrast_ok(cat_l, bg_l, min_delta) and temperature(bg_h) == preferred_temp:
@@ -109,13 +152,13 @@ def _pick_bg(pool: dict, cat_l: float, cat_hue: float,
 
     # Pass 2: L-contrast only (drop temperature preference)
     for _ in range(max_tries):
-        name, rgb = _sample_bg(pool)
+        name, rgb = sampler(pool)
         bg_l = WAALS.get(name, (0, 0, 0))[2]
         if _l_contrast_ok(cat_l, bg_l, min_delta):
             return name, rgb
 
     # Pass 3: any bg (pool may be too narrow)
-    return _sample_bg(pool)
+    return sampler(pool)
 
 
 # ── Step 4+5: Eyes with hue accent and S boost ───────────────────────────────
@@ -172,8 +215,8 @@ def _pick_tonal() -> tuple:
     cat_name, cat_rgb = _sample_cat(TONAL_CAT_POOL, _CAT_DELTA)
     cat_h, _, cat_l   = WAALS.get(cat_name, (0, 0, 0))
 
-    # Steps 2+3: Background — softer threshold (S contrast covers lightness overlap)
-    bg_name, bg_rgb = _pick_bg(TONAL_BG_POOL, cat_l, cat_h, min_delta=8)
+    # Steps 2+3: Background — adaptive threshold based on cat lightness
+    bg_name, bg_rgb = _pick_bg(TONAL_BG_POOL, cat_l, cat_h, mode="tonal")
 
     # Steps 4+5: Eyes
     eye_name, eye_rgb = _pick_eye(TONAL_EYE_POOL, cat_h)
@@ -192,8 +235,8 @@ def _pick_noir() -> tuple:
     cat_name, cat_rgb = _sample_cat(NOIR_CAT_POOL, _CAT_DELTA)
     cat_h, _, cat_l   = WAALS.get(cat_name, (0, 0, 0))
 
-    # Steps 2+3: Background — min_delta=10 (achievable for all noir cats vs pool max L=45)
-    bg_name, bg_rgb = _pick_bg(NOIR_BG_POOL, cat_l, cat_h, min_delta=10)
+    # Steps 2+3: Background — adaptive threshold based on cat lightness
+    bg_name, bg_rgb = _pick_bg(NOIR_BG_POOL, cat_l, cat_h, mode="noir")
 
     # Steps 4+5: Eyes
     eye_name, eye_rgb = _pick_eye(NOIR_EYE_POOL, cat_h)
@@ -251,8 +294,9 @@ def pick_collection_colors() -> list:
         cat_h, _, cat_l = WAALS.get(cat_name, (0, 0, 0))
         bg_pool  = TONAL_BG_POOL if cat_l > 50 else NOIR_BG_POOL
         eye_pool = TONAL_EYE_POOL if cat_l > 50 else NOIR_EYE_POOL
+        mode     = "tonal" if cat_l > 50 else "noir"
 
-        bg_name,  bg_rgb  = _pick_bg(bg_pool, cat_l, cat_h)
+        bg_name,  bg_rgb  = _pick_bg(bg_pool, cat_l, cat_h, mode=mode)
         eye_name, eye_rgb = _pick_eye(eye_pool, cat_h)
 
         combos.append((cat_rgb, cat_name, bg_rgb, bg_name, eye_rgb, eye_name))

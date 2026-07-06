@@ -12,8 +12,8 @@ from pathlib import Path
 from PIL import Image, ImageChops
 
 from form_builder import plan_layered, plan_multi
-from color_selector import pick_pair_colors, pick_collection_colors
-from palette import TONAL_BG_POOL, NOIR_BG_POOL, _sample_bg
+from color_selector import pick_pair_colors, pick_collection_colors, hue_dist
+from palette import TONAL_BG_POOL, NOIR_BG_POOL, WAALS, _sample_bg
 
 
 OUTPUT_DIR = Path("products")
@@ -84,19 +84,28 @@ def _too_similar(c1, c2) -> bool:
     return max(abs(a - b) for a, b in zip(c1, c2)) < 15
 
 
+def _bg_pair_ok(name1: str, name2: str, rgb1, rgb2) -> bool:
+    """Two background halves should be distinct but not clashing hues."""
+    if name1 == name2 or _too_similar(rgb1, rgb2):
+        return False
+    h1 = WAALS.get(name1, (0, 0, 0))[0]
+    h2 = WAALS.get(name2, (0, 0, 0))[0]
+    return hue_dist(h1, h2) <= 100
+
+
 def _pick_two_bg(pool: dict, locked_rgb=None, locked_name=None):
-    """Pick two visually distinct background colors from a pool."""
+    """Pick two visually distinct, hue-harmonious background colors from a pool."""
     bg1_name, bg1_rgb = _sample_bg(pool)
     if locked_rgb is not None:
         bg2_rgb, bg2_name = locked_rgb, locked_name or "accent"
         for _ in range(50):
-            if bg1_name != bg2_name and not _too_similar(bg1_rgb, bg2_rgb):
+            if _bg_pair_ok(bg1_name, bg2_name, bg1_rgb, bg2_rgb):
                 break
             bg1_name, bg1_rgb = _sample_bg(pool)
     else:
         bg2_name, bg2_rgb = _sample_bg(pool)
         for _ in range(50):
-            if bg2_name != bg1_name and not _too_similar(bg1_rgb, bg2_rgb):
+            if _bg_pair_ok(bg1_name, bg2_name, bg1_rgb, bg2_rgb):
                 break
             bg2_name, bg2_rgb = _sample_bg(pool)
     return bg1_name, bg1_rgb, bg2_name, bg2_rgb
@@ -128,6 +137,7 @@ def generate_pair(out_dir: Path = None) -> tuple:
     # Step 3: Build
     print(f"  [katt_1 — tonal]  {cat_name} / {eye_name} eyes / {bg_name} bg")
     bg1_name, bg1_rgb, bg2_name, bg2_rgb = _pick_two_bg(TONAL_BG_POOL, bg_rgb, bg_name)
+    tonal_hues = [WAALS[bg1_name][0], WAALS[bg2_name][0]]
     k1_layered = render_layered(layered_form, cat_rgb, eye_rgb, bg1_rgb, bg2_rgb)
     k1_multi   = render_multi(multi_form, cat_rgb, eye_rgb, bg2_rgb)
     uid1 = uuid.uuid4().hex[:6]
@@ -137,7 +147,11 @@ def generate_pair(out_dir: Path = None) -> tuple:
     k1_multi.save(k1_multi_path)
 
     print(f"  [katt_2 — noir]   {cat_name2} / {eye_name2} eyes / {bg_name2} bg")
-    bg1_name2, bg1_rgb2, bg2_name2, bg2_rgb2 = _pick_two_bg(NOIR_BG_POOL, bg_rgb2, bg_name2)
+    for _ in range(20):
+        bg1_name2, bg1_rgb2, bg2_name2, bg2_rgb2 = _pick_two_bg(NOIR_BG_POOL, bg_rgb2, bg_name2)
+        noir_hues = [WAALS[bg1_name2][0], WAALS[bg2_name2][0]]
+        if any(hue_dist(th, nh) <= 60 for th in tonal_hues for nh in noir_hues):
+            break
     k2_layered = render_layered(layered_form, cat_rgb2, eye_rgb2, bg1_rgb2, bg2_rgb2)
     k2_multi   = render_multi(multi_form, cat_rgb2, eye_rgb2, bg2_rgb2)
     uid2 = uuid.uuid4().hex[:6]
@@ -208,6 +222,7 @@ def generate_set(out_dir: Path = None) -> Path:
     # Step 3: Build prints with _print_ prefix, saved flat in set_dir
     print(f"  [katt_1 — tonal]  {cat_name} / {eye_name} eyes / {bg_name} bg")
     bg1_name, bg1_rgb, bg2_name, bg2_rgb = _pick_two_bg(TONAL_BG_POOL, bg_rgb, bg_name)
+    tonal_hues = [WAALS[bg1_name][0], WAALS[bg2_name][0]]
     k1_layered = render_layered(layered_form,  cat_rgb, eye_rgb, bg1_rgb, bg2_rgb)
     k1_multi   = render_multi(multi_form_k1, cat_rgb, eye_rgb, bg2_rgb)
     uid1 = uuid.uuid4().hex[:6]
@@ -217,7 +232,11 @@ def generate_set(out_dir: Path = None) -> Path:
     k1_multi.save(k1_multi_path)
 
     print(f"  [katt_2 — noir]   {cat_name2} / {eye_name2} eyes / {bg_name2} bg")
-    bg1_name2, bg1_rgb2, bg2_name2, bg2_rgb2 = _pick_two_bg(NOIR_BG_POOL, bg_rgb2, bg_name2)
+    for _ in range(20):
+        bg1_name2, bg1_rgb2, bg2_name2, bg2_rgb2 = _pick_two_bg(NOIR_BG_POOL, bg_rgb2, bg_name2)
+        noir_hues = [WAALS[bg1_name2][0], WAALS[bg2_name2][0]]
+        if any(hue_dist(th, nh) <= 60 for th in tonal_hues for nh in noir_hues):
+            break
     k2_layered = render_layered(layered_form,  cat_rgb2, eye_rgb2, bg1_rgb2, bg2_rgb2)
     k2_multi   = render_multi(multi_form_k2, cat_rgb2, eye_rgb2, bg2_rgb2)
     uid2 = uuid.uuid4().hex[:6]

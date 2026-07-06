@@ -18,7 +18,7 @@ TEMPLATES_DIR = Path("assets/mockup-templates")
 PRODUCTS_DIR  = Path("products")
 CALIB_FILE    = Path("pipeline/mockup/calibration.json")
 
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__, template_folder="html_interface")
 
 _bounds_cache = {}
 
@@ -327,12 +327,11 @@ def api_generate(slug):
 
         psd_path = TEMPLATES_DIR / entry["path"]
 
-        # Find a test print to use (only from pair-* dirs, not mockups/)
+        # Find a test print to use from set-* dirs
         products_dir = Path("products")
         print_path = next(
             (p for col in sorted(products_dir.iterdir()) if col.is_dir()
-             for pair in sorted(col.iterdir()) if pair.is_dir() and pair.name.startswith("pair")
-             for p in sorted(pair.glob("layered_*.png"))),
+             for p in sorted(col.glob("_print_portrait_*.png"))),
             None
         )
         if not print_path:
