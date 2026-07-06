@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-pipeline/generate/run.py — Manual generation tool for Katteboten.
+pipeline/generate/run.py — Manual generation tool for etsy-pipeline.
 
 Run from project root: python3 pipeline/generate/run.py
 
@@ -35,7 +35,7 @@ def ask(question: str, options: list[str]) -> str:
 
 def main():
     print("\n╔══════════════════════════╗")
-    print("║      Katteboten          ║")
+    print("║      etsy-pipeline       ║")
     print("╚══════════════════════════╝\n")
 
     mode = ask("What do you want to generate?", [

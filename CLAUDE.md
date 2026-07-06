@@ -1,4 +1,4 @@
-# Katteboten — CLAUDE.md
+# etsy-pipeline — CLAUDE.md
 
 Project log and context for Claude Code. Update this file when something important is finished or changed.
 

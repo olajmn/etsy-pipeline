@@ -1,5 +1,5 @@
 """
-pipeline/telegram_bot.py — Telegram interface for Katteboten.
+pipeline/telegram_bot.py — Telegram interface for etsy-pipeline.
 
 Commands:
   /generate      — generate + describe 1 collection, send preview
@@ -77,7 +77,7 @@ def _status_text() -> str:
 @_only_owner
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Katteboten:\n\n"
+        "etsy-pipeline:\n\n"
         "/generate — lag 1 collection (bilder + beskrivelse)\n"
         "/generate 3 — lag N collections\n"
         "/publish — send ventende collections til Etsy drafts\n"
@@ -158,7 +158,7 @@ def main():
     app.add_handler(CommandHandler("generate", cmd_generate))
     app.add_handler(CommandHandler("publish",  cmd_publish))
 
-    print("Katteboten er klar. Trykk Ctrl+C for å stoppe.")
+    print("etsy-pipeline er klar. Trykk Ctrl+C for å stoppe.")
     app.run_polling()
 
 

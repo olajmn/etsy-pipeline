@@ -30,7 +30,7 @@ PRODUCTS_DIR = Path("products")
 def generate_and_describe(count: int = 1) -> list[Path]:
     """Generate + describe N collections. Returns list of collection dirs."""
     print(f"\n{'='*50}")
-    print(f"  Katteboten — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    print(f"  etsy-pipeline — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     print(f"  Generating {count} collection(s)")
     print(f"{'='*50}\n")
 

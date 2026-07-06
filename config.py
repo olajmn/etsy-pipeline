@@ -1,5 +1,5 @@
 """
-config.py — Business rules and fixed values for Katteboten.
+config.py — Business rules and fixed values for etsy-pipeline.
 
 Things that should never be guessed by AI — set them here.
 """
