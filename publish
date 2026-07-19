@@ -1,0 +1,7 @@
+#!/bin/bash
+# Describes (if needed) + publishes as Etsy drafts. Never publishes twice.
+#   ./publish            → everything not yet published
+#   ./publish set-4      → only set-4
+#   ./publish 4          → same, short form
+cd "$(dirname "$0")"
+python3 pipeline/publish/cli.py "$@"

@@ -23,11 +23,11 @@ from dotenv import load_dotenv
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from config import PRICE_USD
+from config import PRICE_USD, SET_PRICE_USD
+from pipeline.generate.image_builder import find_set_pairs
+from pipeline.products import PRODUCTS_DIR as PAIRS_DIR, find_pair_folders, find_set_dirs
 
 load_dotenv(override=True)
-
-PAIRS_DIR = Path("products")
 
 SYSTEM = (
     "You are an Etsy shop assistant writing product listings for a minimalist "
@@ -51,6 +51,25 @@ Write Etsy listing metadata. Return a JSON object with exactly these fields:
 
 Keywords to weave in: minimalist, cat, wall art, digital download, home decor, Scandinavian, art print, instant download, cat lover gift."""
 
+SET_PROMPT = """These four images feature TWO DIFFERENT cat characters, sold together as one bundled set:
+- Image 1: Cat A — a layered poster (large format, split background)
+- Image 2: Cat A — a portrait poster (three poses of the same cat, solid background)
+- Image 3: Cat B — a layered poster (large format, split background)
+- Image 4: Cat B — a portrait poster (three poses of the same cat, solid background)
+
+Each cat is its own character — one color, one personality — shown across two prints. The two cats together make one bundled set of 4 prints, sold as a single listing.
+
+First, give EACH cat its own unique character name that fits its color and personality — short, memorable, feels like a real pet name. Think of how "Frøya" suits a warm fiery cat without saying "orange", or how "Luna" suits a pale dreamy cat without saying "white". Names can be from any language or origin. Do NOT use names that literally describe the color (not "Rust", "Ginger", "Shadow", "Ash", "Bluebell", or similar). The two names must be different from each other.
+
+Write Etsy listing metadata for this ONE combined listing. Return a JSON object with exactly these fields:
+- "cat_name_1": string, the unique name you chose for Cat A
+- "cat_name_2": string, the unique name you chose for Cat B
+- "title": string, max 140 characters, SEO-rich. Mention both cat names, make clear this is a set of 2, include keywords: "cat print", "wall art", "digital download", "Scandinavian", "set of 2". Etsy only allows the character "&" to appear ONCE in a title — use it at most once (e.g. only between the two cat names, "and" elsewhere), or not at all
+- "description": string, 3–5 short paragraphs with line breaks (\\n\\n). Introduce both cats by name as two distinct characters. Warm, personal tone. Mention it's a bundled set of 2 cats (4 prints total), instant digital download, mention the colors of each cat. No links or contact info.
+- "tags": array of exactly 13 strings, each max 20 characters, no spaces (use hyphens), mix broad and specific, covering the set as a whole
+
+Keywords to weave in: minimalist, cat, wall art, digital download, home decor, Scandinavian, art print, instant download, cat lover gift, set of 2."""
+
 
 def _encode(path: Path, max_width: int = 800) -> str:
     img = Image.open(path)
@@ -68,24 +87,16 @@ def collect_used_names(base_dir: Path = None) -> list[str]:
     for desc in base.rglob("description.json"):
         try:
             data = json.loads(desc.read_text())
-            name = data.get("cat_name", "").strip()
-            if name:
-                names.append(name)
+            for key in ("cat_name", "cat_name_1", "cat_name_2"):
+                name = data.get(key, "").strip()
+                if name:
+                    names.append(name)
         except Exception:
             pass
     return sorted(set(names))
 
 
-def describe_pair(folder: Path, used_names: list[str] = None) -> dict:
-    images = sorted(folder.glob("*.png"))
-    if len(images) < 2:
-        raise ValueError(f"Expected 2 images in {folder.name}, found {len(images)}")
-
-    prompt = PROMPT
-    if used_names:
-        taken = ", ".join(used_names)
-        prompt += f"\n\nIMPORTANT: These names are already taken — do NOT use them: {taken}."
-
+def _ask_claude(images: list[Path], prompt: str) -> dict:
     content = []
     for img_path in images:
         content.append({
@@ -104,19 +115,61 @@ def describe_pair(folder: Path, used_names: list[str] = None) -> dict:
 
     text = next(b.text for b in response.content if b.type == "text").strip()
     metadata = json.loads(text)
-
-    tags = metadata.get("tags", [])
-    metadata["tags"] = tags[:13]
-    metadata["price_usd"] = PRICE_USD
-
+    metadata["tags"] = metadata.get("tags", [])[:13]
     return metadata
 
 
-def _find_pair_folders() -> list[Path]:
-    folders = sorted(PAIRS_DIR.glob("generation-*"))
-    for collection in sorted(PAIRS_DIR.glob("collection-*")):
-        folders.extend(sorted(collection.glob("pair-*")))
-    return folders
+def describe_pair(folder: Path, used_names: list[str] = None) -> dict:
+    images = sorted(folder.glob("*.png"))
+    if len(images) < 2:
+        raise ValueError(f"Expected 2 images in {folder.name}, found {len(images)}")
+
+    prompt = PROMPT
+    if used_names:
+        taken = ", ".join(used_names)
+        prompt += f"\n\nIMPORTANT: These names are already taken — do NOT use them: {taken}."
+
+    metadata = _ask_claude(images, prompt)
+    metadata["price_usd"] = PRICE_USD
+    return metadata
+
+
+def describe_set(pairs: dict, used_names: list[str] = None) -> dict:
+    """One combined description for a set-N dir's 2 cats (katt1 + katt2)."""
+    images = [
+        pairs["katt1"]["portrait"], pairs["katt1"]["composition"],
+        pairs["katt2"]["portrait"], pairs["katt2"]["composition"],
+    ]
+
+    prompt = SET_PROMPT
+    if used_names:
+        taken = ", ".join(used_names)
+        prompt += f"\n\nIMPORTANT: These names are already taken — do NOT use them: {taken}."
+
+    metadata = _ask_claude(images, prompt)
+    metadata["price_usd"] = SET_PRICE_USD
+    return metadata
+
+
+def _build_work_items(folders: list[Path], set_dirs: list[Path]) -> list[dict]:
+    """Flatten pair-folders and set-N dirs into one work list. Each set-N dir
+    becomes ONE combined listing (both cats, 4 prints)."""
+    items = []
+    for folder in folders:
+        label = f"{folder.parent.name}/{folder.name}" if folder.parent.name.startswith("collection") else folder.name
+        items.append({"label": label, "kind": "pair", "folder": folder, "out_path": folder / "description.json"})
+    for set_dir in set_dirs:
+        pairs = find_set_pairs(set_dir)
+        if "katt1" not in pairs or "katt2" not in pairs:
+            continue
+        items.append({
+            "label":    set_dir.name,
+            "kind":     "set",
+            "folder":   set_dir,
+            "pairs":    pairs,
+            "out_path": set_dir / "description.json",
+        })
+    return items
 
 
 def main():
@@ -128,35 +181,48 @@ def main():
             print(f"Folder not found: {folder}")
             sys.exit(1)
         pairs = sorted(folder.glob("pair-*"))
-        folders = pairs if pairs else [folder]
+        if pairs:
+            folders, set_dirs = pairs, []
+        elif folder.name.startswith("set-"):
+            folders, set_dirs = [], [folder]
+        else:
+            folders, set_dirs = [folder], []
     else:
-        folders = _find_pair_folders()
-        if not folders:
-            print(f"No pair folders found in {PAIRS_DIR}")
+        folders  = find_pair_folders()
+        set_dirs = find_set_dirs()
+        if not folders and not set_dirs:
+            print(f"No pair or set folders found in {PAIRS_DIR}")
             sys.exit(1)
 
-    todo = [f for f in folders if not (f / "description.json").exists()]
-    done = len(folders) - len(todo)
+    work_items = _build_work_items(folders, set_dirs)
+    todo = [w for w in work_items if not w["out_path"].exists()]
+    done = len(work_items) - len(todo)
 
-    print(f"\n{len(folders)} pair(s) found — {done} already described, {len(todo)} remaining\n")
+    print(f"\n{len(work_items)} pair(s) found — {done} already described, {len(todo)} remaining\n")
 
     used_names = collect_used_names()
 
-    for folder in todo:
-        label = f"{folder.parent.name}/{folder.name}" if folder.parent.name.startswith("collection") else folder.name
-        print(f"[{label}] Sending to Claude...")
+    for item in todo:
+        print(f"[{item['label']}] Sending to Claude...")
         try:
-            metadata = describe_pair(folder, used_names=used_names)
-            out = folder / "description.json"
-            out.write_text(json.dumps(metadata, indent=2, ensure_ascii=False))
-            used_names.append(metadata.get("cat_name", ""))
-            print(f"  Cat:    {metadata.get('cat_name', '?')}")
+            if item["kind"] == "set":
+                metadata = describe_set(item["pairs"], used_names=used_names)
+                cat_label = f"{metadata.get('cat_name_1', '?')} & {metadata.get('cat_name_2', '?')}"
+                used_names.append(metadata.get("cat_name_1", ""))
+                used_names.append(metadata.get("cat_name_2", ""))
+            else:
+                metadata = describe_pair(item["folder"], used_names=used_names)
+                cat_label = metadata.get("cat_name", "?")
+                used_names.append(metadata.get("cat_name", ""))
+
+            item["out_path"].write_text(json.dumps(metadata, indent=2, ensure_ascii=False))
+            print(f"  Cat:    {cat_label}")
             print(f"  Title:  {metadata['title'][:70]}...")
             print(f"  Price:  ${metadata['price_usd']}")
             print(f"  Tags:   {', '.join(metadata['tags'][:5])}...")
-            print(f"  Saved:  {out}\n")
+            print(f"  Saved:  {item['out_path']}\n")
         except Exception as e:
-            print(f"  ERROR in {folder.name}: {e}\n")
+            print(f"  ERROR in {item['label']}: {e}\n")
 
     print("Done!")
 

@@ -18,10 +18,11 @@ from dotenv import load_dotenv
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import SHOP_ID, CLIENT_ID, SHARED_SECRET, TAXONOMY_ID, WHO_MADE, WHEN_MADE, QUANTITY
+from pipeline.generate.image_builder import find_set_pairs
+from pipeline.products import PRODUCTS_DIR, find_pair_folders, find_set_dirs
 
 load_dotenv(override=True)
 
-PRODUCTS_DIR = Path("products")
 BASE_URL     = "https://openapi.etsy.com/v3/application"
 ENV_FILE     = Path(".env")
 
@@ -66,13 +67,6 @@ def _headers() -> dict:
         "Authorization": f"Bearer {_access_token}",
         "x-api-key":     f"{CLIENT_ID}:{SHARED_SECRET}",
     }
-
-
-def _find_pair_folders() -> list[Path]:
-    folders = sorted(PRODUCTS_DIR.glob("generation-*"))
-    for collection in sorted(PRODUCTS_DIR.glob("collection-*")):
-        folders.extend(sorted(collection.glob("pair-*")))
-    return folders
 
 
 def create_listing(meta: dict) -> int:
@@ -126,13 +120,15 @@ def delete_listing(listing_id: int):
     )
 
 
-def publish_pair(folder: Path):
-    meta   = json.loads((folder / "description.json").read_text())
-    images = sorted(folder.glob("*.png"))
-    in_progress = folder / "publishing.json"
+def publish_unit(label: str, meta_path: Path, listing_images: list[Path],
+                  download_images: list[Path], published_path: Path) -> dict:
+    """Create a draft Etsy listing: listing_images become the photos, download_images
+    become the purchased digital files."""
+    meta = json.loads(meta_path.read_text())
+    in_progress = published_path.parent / published_path.name.replace("published", "publishing")
 
-    if len(images) < 2:
-        raise ValueError(f"Expected 2 images in {folder.name}, found {len(images)}")
+    if len(listing_images) < 2:
+        raise ValueError(f"Expected at least 2 listing images for {label}, found {len(listing_images)}")
 
     # Clean up any previous crashed attempt
     if in_progress.exists():
@@ -148,12 +144,12 @@ def publish_pair(folder: Path):
     # Save immediately so a crash can be recovered
     in_progress.write_text(json.dumps({"listing_id": listing_id}))
 
-    for i, img in enumerate(images, 1):
-        print(f"  Uploading image {i}/2: {img.name}")
+    for i, img in enumerate(listing_images, 1):
+        print(f"  Uploading image {i}/{len(listing_images)}: {img.name}")
         upload_image(listing_id, img, rank=i)
 
-    for i, img in enumerate(images, 1):
-        print(f"  Uploading file  {i}/2: {img.name}")
+    for i, img in enumerate(download_images, 1):
+        print(f"  Uploading file  {i}/{len(download_images)}: {img.name}")
         upload_file(listing_id, img, rank=i)
 
     result = {
@@ -163,10 +159,60 @@ def publish_pair(folder: Path):
         "published_at": datetime.now().isoformat(),
         "url":          f"https://www.etsy.com/listing/{listing_id}",
     }
-    (folder / "published.json").write_text(json.dumps(result, indent=2))
+    published_path.write_text(json.dumps(result, indent=2))
     in_progress.unlink()
     print(f"  Saved as draft: {result['url']}")
     return result
+
+
+def publish_pair(folder: Path) -> dict:
+    """Publish a collection-N/pair-X folder (all its images used as both photos and files)."""
+    images = sorted(folder.glob("*.png"))
+    return publish_unit(
+        label=folder.name,
+        meta_path=folder / "description.json",
+        listing_images=images,
+        download_images=images,
+        published_path=folder / "published.json",
+    )
+
+
+def _build_work_items(folders: list[Path], set_dirs: list[Path]) -> list[dict]:
+    """Flatten pair-folders and set-N dirs into one work list. Each set-N dir
+    is ONE combined listing (both cats, 4 prints as downloads, all mockups as photos)."""
+    items = []
+    for folder in folders:
+        images = sorted(folder.glob("*.png"))
+        items.append({
+            "label":           folder.name,
+            "meta_path":       folder / "description.json",
+            "listing_images":  images,
+            "download_images": images,
+            "published_path":  folder / "published.json",
+        })
+    for set_dir in set_dirs:
+        meta_path = set_dir / "description.json"
+        if not meta_path.exists():
+            continue
+        pairs = find_set_pairs(set_dir)
+        if "katt1" not in pairs or "katt2" not in pairs:
+            continue
+        download_images = [
+            pairs["katt1"]["portrait"], pairs["katt1"]["composition"],
+            pairs["katt2"]["portrait"], pairs["katt2"]["composition"],
+        ]
+        listing_images = sorted(
+            set(pairs["katt1"]["mockups"]) | set(pairs["katt2"]["mockups"]),
+            key=lambda p: p.name,
+        )
+        items.append({
+            "label":           set_dir.name,
+            "meta_path":       meta_path,
+            "listing_images":  listing_images,
+            "download_images": download_images,
+            "published_path":  set_dir / "published.json",
+        })
+    return items
 
 
 def main():
@@ -178,15 +224,18 @@ def main():
             print(f"Folder not found: {folder}")
             sys.exit(1)
         pairs = sorted(folder.glob("pair-*"))
-        all_folders = pairs if pairs else [folder]
+        if pairs:
+            folders, set_dirs = pairs, []
+        elif folder.name.startswith("set-"):
+            folders, set_dirs = [], [folder]
+        else:
+            folders, set_dirs = [folder], []
     else:
-        all_folders = _find_pair_folders()
+        folders  = find_pair_folders()
+        set_dirs = find_set_dirs()
 
-    todo = [
-        f for f in all_folders
-        if (f / "description.json").exists()
-        and not (f / "published.json").exists()
-    ]
+    work_items = _build_work_items(folders, set_dirs)
+    todo = [w for w in work_items if w["meta_path"].exists() and not w["published_path"].exists()]
 
     if not todo:
         print("No unpublished pairs found.")
@@ -195,10 +244,11 @@ def main():
     _refresh_token()
     print(f"\n{len(todo)} pair(s) ready to publish as draft\n")
 
-    for folder in todo:
-        print(f"[{folder.name}]")
+    for item in todo:
+        print(f"[{item['label']}]")
         try:
-            publish_pair(folder)
+            publish_unit(item["label"], item["meta_path"], item["listing_images"],
+                         item["download_images"], item["published_path"])
             print()
         except requests.HTTPError as e:
             print(f"  ERROR {e.response.status_code}: {e.response.text}\n")

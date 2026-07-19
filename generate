@@ -1,0 +1,6 @@
+#!/bin/bash
+# Generates cat product sets. Run from the project root:
+#   ./generate        → 1 set
+#   ./generate 3      → 3 sets
+cd "$(dirname "$0")"
+python3 pipeline/generate/cli.py "$@"

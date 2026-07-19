@@ -9,13 +9,23 @@ Project log and context for Claude Code. Update this file when something importa
 A Python pipeline that automatically generates and sells cat art posters on Etsy.
 
 ```
-User                  Pipeline                    Etsy
-  │                      │                          │
-  └── run_all.py ──► generate → describe → mockup → publish
-                     (images)  (AI text)  (room scene) (API)
+User                  Pipeline                          Etsy
+  │                      │                                │
+  └── ./generate ──► generate → (describe → mockup) ──► ./publish → draft listing
+                     (images)   (AI text)  (room scene)   (Etsy API)
 ```
 
-Run from the project root: `python3 pipeline/run_all.py`
+Run from the project root. Five commands, see `./help`:
+
+| Command | What it does |
+|---|---|
+| `./generate [N]` | Generate N sets (default 1) — no menu, no prompts |
+| `./reject <N>` | Move `set-N` to `products/rejected/` (reversible) |
+| `./renumber` | Close gaps in `set-N` numbering after a reject |
+| `./publish [N]` | Auto-describe (Claude) + publish everything unpublished, or just `set-N`. Never publishes twice. |
+| `./help` | List all commands |
+
+`pipeline/generate/run.py` still exists as an interactive menu for the experimental modes (Collection, Pattern, etc.) — but day-to-day production goes through the commands above.
 
 ---
 
@@ -25,30 +35,36 @@ Run from the project root: `python3 pipeline/run_all.py`
 etsy-bot/
 ├── config.py                  — pricing, Etsy settings, API keys
 ├── requirements.txt
+├── generate, reject, renumber, publish, help  — root-level command scripts (bash wrappers)
 ├── pipeline/
-│   ├── run_all.py             — main entry point: generate + describe + mockup + publish
-│   ├── telegram_bot.py        — Telegram bot for controlling the pipeline from phone
+│   ├── products.py            — shared find_pair_folders()/find_set_dirs() (used by describe.py + publish.py)
 │   ├── generate/
 │   │   ├── palette.py         — Waals palette (143 named colors, HSL + CMYK)
 │   │   ├── color_selector.py  — color theory and pair selection logic
-│   │   ├── image_builder.py   — draws cat images (generate_collection, generate_set)
+│   │   ├── image_builder.py   — draws cat images (generate_collection, generate_set, find_set_pairs, renumber_sets)
 │   │   ├── color_card.py      — generates a color card image per pair
 │   │   ├── form_builder.py    — helper shapes for image generation
-│   │   └── run.py             — interactive menu (standalone)
+│   │   ├── run.py             — interactive menu (standalone, experimental modes)
+│   │   ├── cli.py             — non-interactive set generator, backs ./generate
+│   │   ├── reject.py          — backs ./reject
+│   │   └── renumber.py        — backs ./renumber
 │   ├── describe/
 │   │   └── describe.py        — uses Claude AI to write Etsy titles and descriptions
 │   ├── mockup/
 │   │   ├── mockup.py          — places cat images into room scene PNG templates
-│   │   ├── calibrate.py       — calibrates perspective frames in room scenes
+│   │   ├── calibrate.py       — calibrates perspective frames in room scenes, has a "deactivate template" endpoint
 │   │   └── calibration.json   — saved calibration points per template
 │   └── publish/
 │       ├── publish.py         — posts to Etsy via API
+│       ├── cli.py             — describe (if needed) + publish in one step, backs ./publish
 │       └── oauth.py           — Etsy OAuth2 flow
 ├── assets/
-│   └── color-compositions/    — pre-generated color compositions (PNG)
+│   ├── color-compositions/    — pre-generated color compositions (PNG)
+│   └── mockup-templates/      — room-scene templates; mockuptemplates_calibrated/deactivated/ holds disabled ones
 └── products/
-    └── collection-N/
-        └── pair-A/            — one product pair: images + description.json + published.json
+    ├── set-N/                 — current production path: 2 cats flat per set + description.json + published.json
+    ├── rejected/set-N/        — sets moved aside via ./reject, excluded from production
+    └── collection-N/pair-A/   — old per-pair structure, code path still exists but unused in practice
 ```
 
 ---
@@ -90,8 +106,14 @@ etsy-bot/
 - [x] Template tagging in the calibrator
 - [x] Multi-frame mockup calibration (multiple frames per room scene)
 - [x] Color cards (`color_card.py`)
-- [x] Telegram bot for controlling the pipeline from phone
 - [x] Etsy OAuth2 and publishing via API
+- [x] `generate_set()` output (`products/set-N/`, 2 cats flat per set) connected to `describe.py` and `publish.py` via `find_set_pairs()` in `image_builder.py` — each set-N becomes ONE combined Etsy draft listing (both cats named individually, e.g. "Yuki & Damson", `SET_PRICE_USD` from config.py), 4 print files as digital downloads + all mockups as listing photos, no Printify
+- [x] Fixed `image_builder.py`'s bare `from form_builder import ...` so it can be imported as `pipeline.generate.image_builder`
+- [x] 2026-07-19: Non-interactive command layer built — `./generate [N]`, `./reject <N>`, `./renumber`, `./publish [N]`, `./help` (root-level bash wrappers over `pipeline/generate/cli.py`, `reject.py`, `renumber.py`, `pipeline/publish/cli.py`). `./publish` auto-runs describe for anything missing `description.json`, then publishes anything missing `published.json` — never publishes twice.
+- [x] `renumber_sets()` in `image_builder.py` closes gaps in `set-N` numbering (safe on already-published sets — `published.json` stores the Etsy `listing_id`/URL, not the folder name)
+- [x] Deduplicated `_find_pair_folders()`/`_find_set_dirs()` (previously copy-pasted in both `describe.py` and `publish.py`) into `pipeline/products.py`, shared by both plus `pipeline/publish/cli.py`
+- [x] Deleted `pipeline/run_all.py` (old, never-actually-used `collection-N/pair-X` entry point) and `pipeline/telegram_bot.py` (was wired to `run_all.py`, out of sync with the `set-N` flow) — user's call, 2026-07-19. No code depended on either beyond each other.
+- [x] Mockup template deactivation via the existing `calibrate.py` mechanism (`active: false` in `all_segments.json` + move calibrated PNG to `mockuptemplates_calibrated/deactivated/`) — templates 0086 and 0107 deactivated 2026-07-19
 
 ---
 
@@ -99,7 +121,9 @@ etsy-bot/
 
 *(Update this list as things get done or priorities change)*
 
-- [ ] ?
+- [ ] `PRINTIFY_API_TOKEN` in `.env` is expired/invalid (confirmed via `/v1/shops.json` → "Unauthenticated") — regenerate in Printify → My Account → Connections if the physical-poster (POD) path is needed later. Not required for the digital-download path.
+- [ ] `products/collection-N/pair-X` (the structure `generate_collection()` expects) has never actually been produced — current production path is `set-N` via `./generate`. `generate_collection()` and the pair-based code paths in `describe.py`/`publish.py` still exist but are unused; leaving them for now since they're not causing duplication/confusion, unlike the deleted `run_all.py`.
+- [ ] No Telegram (or other remote) control surface anymore — `./generate`/`./publish` etc. are terminal-only, run on the Mac. Revisit if remote control is wanted again; build it against `pipeline/generate/cli.py`'s `generate()` and `pipeline/publish/cli.py`'s `run()`, which already return structured results for exactly that purpose.
 
 ---
 
@@ -107,5 +131,5 @@ etsy-bot/
 
 - Color choices are governed by the Waals palette — don't use random hex codes
 - Aesthetic rules (Color Universe 02) must be respected when suggesting new colors
-- Always run from the project root: `python3 pipeline/run_all.py` (not from `pipeline/`)
+- Always run from the project root: `./generate`, `./publish`, etc. (not from `pipeline/`)
 - Etsy API keys and tokens live in `.env` (not in code)

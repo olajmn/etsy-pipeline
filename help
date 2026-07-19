@@ -1,0 +1,21 @@
+#!/bin/bash
+# Lists the available commands.
+cat <<'EOF'
+
+etsy-pipeline — available commands (run from the project root)
+
+  ./generate            Generate 1 new set
+  ./generate 3           Generate 3 new sets
+
+  ./reject 3             Move set-3 to products/rejected/ (reversible)
+  ./reject set-3          same, long form
+
+  ./renumber             Close any gaps in set-N numbering
+
+  ./publish               Describe (if needed) + publish everything not yet published
+  ./publish set-4          Describe + publish only set-4
+  ./publish 4              same, short form
+
+  ./help                  Show this list
+
+EOF

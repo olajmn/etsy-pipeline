@@ -1,0 +1,4 @@
+#!/bin/bash
+# Closes gaps in set-N numbering (e.g. after a ./reject) so folders stay sequential.
+cd "$(dirname "$0")"
+python3 pipeline/generate/renumber.py "$@"

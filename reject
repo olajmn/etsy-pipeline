@@ -1,0 +1,6 @@
+#!/bin/bash
+# Moves an unwanted set out of production (reversible - moved to products/rejected/, not deleted).
+#   ./reject 3       → moves products/set-3 to products/rejected/set-3
+#   ./reject set-3   → same thing
+cd "$(dirname "$0")"
+python3 pipeline/generate/reject.py "$@"

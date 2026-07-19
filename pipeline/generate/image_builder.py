@@ -11,6 +11,12 @@ import uuid
 from pathlib import Path
 from PIL import Image, ImageChops
 
+# Allows this module to be imported as pipeline.generate.image_builder
+# (e.g. from describe.py, publish.py) as well as run directly from this folder.
+_here = str(Path(__file__).parent)
+if _here not in sys.path:
+    sys.path.insert(0, _here)
+
 from form_builder import plan_layered, plan_multi
 from color_selector import pick_pair_colors, pick_collection_colors, hue_dist
 from palette import TONAL_BG_POOL, NOIR_BG_POOL, WAALS, _sample_bg
@@ -226,8 +232,8 @@ def generate_set(out_dir: Path = None) -> Path:
     k1_layered = render_layered(layered_form,  cat_rgb, eye_rgb, bg1_rgb, bg2_rgb)
     k1_multi   = render_multi(multi_form_k1, cat_rgb, eye_rgb, bg2_rgb)
     uid1 = uuid.uuid4().hex[:6]
-    k1_layered_path = set_dir / f"_print_portrait_{cat_name}_{eye_name}eyes_{bg1_name}_{bg2_name}_{uid1}.png"
-    k1_multi_path   = set_dir / f"_print_composition_{cat_name}_{eye_name}eyes_{bg2_name}_{uid1}.png"
+    k1_layered_path = set_dir / f"_print_portrait_katt1_{cat_name}_{eye_name}eyes_{bg1_name}_{bg2_name}_{uid1}.png"
+    k1_multi_path   = set_dir / f"_print_composition_katt1_{cat_name}_{eye_name}eyes_{bg2_name}_{uid1}.png"
     k1_layered.save(k1_layered_path)
     k1_multi.save(k1_multi_path)
 
@@ -240,8 +246,8 @@ def generate_set(out_dir: Path = None) -> Path:
     k2_layered = render_layered(layered_form,  cat_rgb2, eye_rgb2, bg1_rgb2, bg2_rgb2)
     k2_multi   = render_multi(multi_form_k2, cat_rgb2, eye_rgb2, bg2_rgb2)
     uid2 = uuid.uuid4().hex[:6]
-    k2_layered_path = set_dir / f"_print_portrait_{cat_name2}_{eye_name2}eyes_{bg1_name2}_{bg2_name2}_{uid2}.png"
-    k2_multi_path   = set_dir / f"_print_composition_{cat_name2}_{eye_name2}eyes_{bg2_name2}_{uid2}.png"
+    k2_layered_path = set_dir / f"_print_portrait_katt2_{cat_name2}_{eye_name2}eyes_{bg1_name2}_{bg2_name2}_{uid2}.png"
+    k2_multi_path   = set_dir / f"_print_composition_katt2_{cat_name2}_{eye_name2}eyes_{bg2_name2}_{uid2}.png"
     k2_layered.save(k2_layered_path)
     k2_multi.save(k2_multi_path)
 
@@ -284,6 +290,69 @@ def generate_set(out_dir: Path = None) -> Path:
 
     print(f"\n  Done — set-{n} → {set_dir}/")
     return set_dir
+
+
+def find_set_pairs(set_dir: Path) -> dict:
+    """
+    Group a set-N/ folder's flat files into its 2 virtual pairs (one per cat).
+
+    Each pair gets its 2 print images (portrait + composition) and the
+    mockups tagged for that cat, plus the shared double-frame mockups
+    (which show both cats and have no katt1/katt2 tag).
+
+    Returns {"katt1": {"portrait": Path, "composition": Path, "mockups": [Path, ...]}, "katt2": {...}}
+    Missing/incomplete pairs are omitted.
+    """
+    shared_mockups = [
+        p for p in sorted(set_dir.glob("*.png"))
+        if not p.name.startswith("_print_") and not p.stem.endswith(("katt1", "katt2"))
+    ]
+
+    pairs = {}
+    for tag in ("katt1", "katt2"):
+        portrait    = next(iter(set_dir.glob(f"_print_portrait_{tag}_*.png")), None)
+        composition = next(iter(set_dir.glob(f"_print_composition_{tag}_*.png")), None)
+        if not portrait or not composition:
+            continue
+        own_mockups = sorted(set_dir.glob(f"*_{tag}.png"))
+        pairs[tag] = {
+            "portrait":    portrait,
+            "composition": composition,
+            "mockups":     own_mockups + shared_mockups,
+        }
+    return pairs
+
+
+def renumber_sets(products_dir: Path = None) -> list:
+    """
+    Close any gaps in set-N numbering (e.g. after a ./reject) so folders are
+    always sequential: 1, 2, 3, ... with no missing numbers.
+
+    products/rejected/ is untouched — it's a differently-named folder, not
+    matched by the "set-*" glob. Safe to run even on already-published sets:
+    published.json stores the Etsy listing_id/url, not the folder name.
+
+    Renames go through temp names first so an in-place shuffle (e.g. set-5 -> set-2)
+    never collides with another set-N folder that hasn't been processed yet.
+    """
+    folder = products_dir or Path("products")
+    dirs = sorted(
+        (d for d in folder.glob("set-*") if d.is_dir() and d.name.split("-")[1].isdigit()),
+        key=lambda d: int(d.name.split("-")[1]),
+    )
+
+    staged = []
+    for d in dirs:
+        tmp = d.with_name(f"_renumber_{d.name}")
+        d.rename(tmp)
+        staged.append(tmp)
+
+    renamed = []
+    for i, tmp in enumerate(staged, 1):
+        final = folder / f"set-{i}"
+        tmp.rename(final)
+        renamed.append(final)
+    return renamed
 
 
 def generate_collection(base_dir: Path = None) -> list:
